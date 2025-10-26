@@ -31,11 +31,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import dev.aulianenko.myfinances.data.database.AppDatabase
 import dev.aulianenko.myfinances.data.entity.Account
+import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.data.repository.AccountRepository
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.EmptyState
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -74,7 +76,7 @@ fun AccountListScreen(
                 LoadingIndicator()
             }
 
-            uiState.accounts.isEmpty() -> {
+            uiState.accountsWithValues.isEmpty() -> {
                 EmptyState(
                     title = "No Accounts Yet",
                     description = "Create your first account to start tracking your finances"
@@ -89,12 +91,13 @@ fun AccountListScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(uiState.accounts) { account ->
+                    items(uiState.accountsWithValues) { accountWithValue ->
                         AccountListItem(
-                            account = account,
-                            onClick = { onNavigateToAccountDetail(account.id) },
-                            onEdit = { onNavigateToEditAccount(account.id) },
-                            onDelete = { viewModel.deleteAccount(account) }
+                            account = accountWithValue.account,
+                            currentValue = accountWithValue.currentValue,
+                            onClick = { onNavigateToAccountDetail(accountWithValue.account.id) },
+                            onEdit = { onNavigateToEditAccount(accountWithValue.account.id) },
+                            onDelete = { viewModel.deleteAccount(accountWithValue.account) }
                         )
                     }
                 }
@@ -106,6 +109,7 @@ fun AccountListScreen(
 @Composable
 fun AccountListItem(
     account: Account,
+    currentValue: AccountValue?,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -115,6 +119,12 @@ fun AccountListItem(
         CurrencyProvider.getCurrencyByCode(account.currency)
     }
     val dateFormat = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
+    val numberFormat = remember {
+        NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+            minimumFractionDigits = 2
+            maximumFractionDigits = 2
+        }
+    }
 
     Card(
         modifier = modifier
@@ -135,13 +145,21 @@ fun AccountListItem(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (currentValue != null) {
+                    Text(
+                        text = "${currency?.symbol ?: ""} ${numberFormat.format(currentValue.value)}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Text(
+                        text = "No value recorded",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Text(
-                    text = currency?.let { "${it.code} (${it.symbol})" } ?: account.currency,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Created ${dateFormat.format(Date(account.createdAt))}",
+                    text = currency?.let { "${it.code} - ${it.name}" } ?: account.currency,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
