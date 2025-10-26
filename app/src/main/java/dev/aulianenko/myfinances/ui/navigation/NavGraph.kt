@@ -29,8 +29,10 @@ fun NavGraph(
         }
 
         composable(Screen.AddAccount.route) {
-            // TODO: Add Account screen will be implemented later
-            PlaceholderScreen(title = "Add Account")
+            dev.aulianenko.myfinances.ui.screens.account.AddAccountScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onAccountSaved = { navController.popBackStack() }
+            )
         }
 
         composable(
