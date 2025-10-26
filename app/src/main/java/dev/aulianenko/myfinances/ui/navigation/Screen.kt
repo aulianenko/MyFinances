@@ -13,5 +13,6 @@ sealed class Screen(val route: String) {
     data object AddAccountValue : Screen("add_account_value/{accountId}") {
         fun createRoute(accountId: String) = "add_account_value/$accountId"
     }
+    data object BulkUpdate : Screen("bulk_update")
     data object Settings : Screen("settings")
 }

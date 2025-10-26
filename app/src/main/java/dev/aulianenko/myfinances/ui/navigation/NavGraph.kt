@@ -22,6 +22,9 @@ fun NavGraph(
             dev.aulianenko.myfinances.ui.screens.dashboard.DashboardScreen(
                 onNavigateToAccountDetail = { accountId ->
                     navController.navigate(Screen.AccountDetail.createRoute(accountId))
+                },
+                onNavigateToBulkUpdate = {
+                    navController.navigate(Screen.BulkUpdate.route)
                 }
             )
         }
@@ -80,6 +83,13 @@ fun NavGraph(
                 accountId = accountId,
                 onNavigateBack = { navController.popBackStack() },
                 onValueSaved = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.BulkUpdate.route) {
+            dev.aulianenko.myfinances.ui.screens.accountvalue.BulkUpdateScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onValuesSaved = { navController.popBackStack() }
             )
         }
 
