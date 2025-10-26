@@ -13,7 +13,7 @@ navigationCompose = "2.8.5"
 roomVersion = "2.6.1"
 ksp = "2.0.21-1.0.28"
 activityCompose = "1.9.3"
-hilt = "2.51"
+hilt = "2.52"
 hiltNavigationCompose = "1.2.0"
 
 [libraries]

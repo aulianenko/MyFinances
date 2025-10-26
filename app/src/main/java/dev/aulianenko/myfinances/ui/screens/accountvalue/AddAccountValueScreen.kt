@@ -17,12 +17,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import dev.aulianenko.myfinances.data.database.AppDatabase
-import dev.aulianenko.myfinances.data.repository.AccountRepository
+import androidx.hilt.navigation.compose.hiltViewModel
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.InputField
@@ -34,14 +32,9 @@ fun AddAccountValueScreen(
     accountId: String,
     onNavigateBack: () -> Unit,
     onValueSaved: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AddAccountValueViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val repository = remember {
-        AccountRepository(database.accountDao(), database.accountValueDao())
-    }
-    val viewModel = remember { AddAccountValueViewModel(repository, accountId) }
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 

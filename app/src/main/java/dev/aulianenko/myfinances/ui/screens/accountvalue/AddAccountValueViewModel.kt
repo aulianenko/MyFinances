@@ -1,7 +1,9 @@
 package dev.aulianenko.myfinances.ui.screens.accountvalue
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.aulianenko.myfinances.data.entity.Account
 import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.data.repository.AccountRepository
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class AddAccountValueUiState(
     val account: Account? = null,
@@ -20,10 +23,13 @@ data class AddAccountValueUiState(
     val errorMessage: String? = null
 )
 
-class AddAccountValueViewModel(
+@HiltViewModel
+class AddAccountValueViewModel @Inject constructor(
     private val repository: AccountRepository,
-    private val accountId: String
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val accountId: String = checkNotNull(savedStateHandle["accountId"])
 
     private val _uiState = MutableStateFlow(AddAccountValueUiState())
     val uiState: StateFlow<AddAccountValueUiState> = _uiState.asStateFlow()

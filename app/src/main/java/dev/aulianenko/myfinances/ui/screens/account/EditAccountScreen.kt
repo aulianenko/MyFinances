@@ -25,11 +25,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import dev.aulianenko.myfinances.data.database.AppDatabase
-import dev.aulianenko.myfinances.data.repository.AccountRepository
+import androidx.hilt.navigation.compose.hiltViewModel
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.InputField
@@ -42,14 +40,9 @@ fun EditAccountScreen(
     accountId: String,
     onNavigateBack: () -> Unit,
     onAccountSaved: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: EditAccountViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val repository = remember {
-        AccountRepository(database.accountDao(), database.accountValueDao())
-    }
-    val viewModel = remember { EditAccountViewModel(repository, accountId) }
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 

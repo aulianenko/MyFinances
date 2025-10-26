@@ -27,12 +27,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dev.aulianenko.myfinances.data.database.AppDatabase
+import androidx.hilt.navigation.compose.hiltViewModel
 import dev.aulianenko.myfinances.data.entity.AccountValue
-import dev.aulianenko.myfinances.data.repository.AccountRepository
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.EmptyState
@@ -47,14 +45,9 @@ fun AccountDetailScreen(
     accountId: String,
     onNavigateBack: () -> Unit,
     onNavigateToAddValue: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AccountDetailViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val repository = remember {
-        AccountRepository(database.accountDao(), database.accountValueDao())
-    }
-    val viewModel = remember { AccountDetailViewModel(repository, accountId) }
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
