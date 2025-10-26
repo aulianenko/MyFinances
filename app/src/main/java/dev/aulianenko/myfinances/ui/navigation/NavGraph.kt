@@ -15,12 +15,16 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.AccountList.route,
+        startDestination = Screen.Dashboard.route,
         modifier = modifier
     ) {
         composable(Screen.Dashboard.route) {
-            // TODO: Dashboard screen will be implemented later
-            PlaceholderScreen(title = "Dashboard")
+            dev.aulianenko.myfinances.ui.screens.dashboard.DashboardScreen(
+                onNavigateToAccountList = { navController.navigate(Screen.AccountList.route) },
+                onNavigateToAccountDetail = { accountId ->
+                    navController.navigate(Screen.AccountDetail.createRoute(accountId))
+                }
+            )
         }
 
         composable(Screen.AccountList.route) {
