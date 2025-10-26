@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,7 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -34,11 +38,13 @@ import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.EmptyState
+import dev.aulianenko.myfinances.ui.components.LineChart
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun AccountDetailScreen(
@@ -144,6 +150,82 @@ fun AccountDetailScreen(
                         }
                     }
 
+                    // Value Trend Chart
+                    if (uiState.accountValues.isNotEmpty()) {
+                        var selectedPeriod by remember { mutableStateOf(TimePeriod.ALL) }
+
+                        val filteredValues = remember(uiState.accountValues, selectedPeriod) {
+                            val currentTime = System.currentTimeMillis()
+                            val cutoffTime = when (selectedPeriod) {
+                                TimePeriod.SEVEN_DAYS -> currentTime - TimeUnit.DAYS.toMillis(7)
+                                TimePeriod.THIRTY_DAYS -> currentTime - TimeUnit.DAYS.toMillis(30)
+                                TimePeriod.NINETY_DAYS -> currentTime - TimeUnit.DAYS.toMillis(90)
+                                TimePeriod.ALL -> 0L
+                            }
+                            uiState.accountValues
+                                .filter { it.timestamp >= cutoffTime }
+                                .sortedBy { it.timestamp }
+                        }
+
+                        val chartData = remember(filteredValues) {
+                            filteredValues.map { it.value }
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Value Trend",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                // Time period filter chips
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(TimePeriod.values()) { period ->
+                                        FilterChip(
+                                            selected = selectedPeriod == period,
+                                            onClick = { selectedPeriod = period },
+                                            label = { Text(period.label) }
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                if (chartData.isNotEmpty()) {
+                                    LineChart(
+                                        data = chartData,
+                                        lineColor = MaterialTheme.colorScheme.primary
+                                    )
+                                } else {
+                                    Text(
+                                        text = "No data for selected period",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
                     // Value History
                     if (uiState.accountValues.isEmpty()) {
                         EmptyState(
@@ -232,4 +314,11 @@ fun AccountValueItem(
             }
         }
     }
+}
+
+enum class TimePeriod(val label: String) {
+    SEVEN_DAYS("7 Days"),
+    THIRTY_DAYS("30 Days"),
+    NINETY_DAYS("90 Days"),
+    ALL("All")
 }
