@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,7 +50,6 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    onNavigateToAccountList: () -> Unit,
     onNavigateToAccountDetail: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -67,17 +65,7 @@ fun DashboardScreen(
 
     Scaffold(
         topBar = {
-            AppTopBar(
-                title = "Dashboard",
-                actions = {
-                    IconButton(onClick = onNavigateToAccountList) {
-                        Icon(
-                            imageVector = Icons.Default.List,
-                            contentDescription = "View Accounts"
-                        )
-                    }
-                }
-            )
+            AppTopBar(title = "Dashboard")
         },
         modifier = modifier
     ) { paddingValues ->

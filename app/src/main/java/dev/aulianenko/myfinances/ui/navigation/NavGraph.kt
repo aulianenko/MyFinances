@@ -20,7 +20,6 @@ fun NavGraph(
     ) {
         composable(Screen.Dashboard.route) {
             dev.aulianenko.myfinances.ui.screens.dashboard.DashboardScreen(
-                onNavigateToAccountList = { navController.navigate(Screen.AccountList.route) },
                 onNavigateToAccountDetail = { accountId ->
                     navController.navigate(Screen.AccountDetail.createRoute(accountId))
                 }
