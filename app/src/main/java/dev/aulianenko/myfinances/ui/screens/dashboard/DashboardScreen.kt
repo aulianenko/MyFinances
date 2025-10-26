@@ -43,6 +43,8 @@ import dev.aulianenko.myfinances.domain.model.TimePeriod
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.EmptyState
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
+import dev.aulianenko.myfinances.ui.components.PieChart
+import dev.aulianenko.myfinances.ui.components.PieChartData
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -156,6 +158,42 @@ fun DashboardScreen(
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(8.dp)
                         )
+                    }
+                }
+
+                // Portfolio Distribution
+                val portfolioData = remember(uiState.portfolioStatistics) {
+                    val stats = uiState.portfolioStatistics?.accountStatistics ?: emptyList()
+                    val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+                        minimumFractionDigits = 2
+                        maximumFractionDigits = 2
+                    }
+
+                    stats.mapIndexed { index, accountStats ->
+                        val currency = CurrencyProvider.getCurrencyByCode(accountStats.currency)
+                        PieChartData(
+                            label = accountStats.accountName,
+                            value = accountStats.currentValue,
+                            formattedValue = "${currency?.symbol ?: ""} ${numberFormat.format(accountStats.currentValue)}"
+                        )
+                    }
+                }
+
+                if (portfolioData.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            PieChart(
+                                data = portfolioData,
+                                showPercentages = true
+                            )
+                        }
                     }
                 }
 
