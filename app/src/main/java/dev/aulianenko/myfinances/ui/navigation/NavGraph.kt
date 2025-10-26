@@ -65,9 +65,13 @@ fun NavGraph(
         composable(
             route = Screen.AddAccountValue.route,
             arguments = listOf(navArgument("accountId") { type = NavType.StringType })
-        ) {
-            // TODO: Add Account Value screen will be implemented later
-            PlaceholderScreen(title = "Add Account Value")
+        ) { backStackEntry ->
+            val accountId = backStackEntry.arguments?.getString("accountId") ?: return@composable
+            dev.aulianenko.myfinances.ui.screens.accountvalue.AddAccountValueScreen(
+                accountId = accountId,
+                onNavigateBack = { navController.popBackStack() },
+                onValueSaved = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.Settings.route) {
