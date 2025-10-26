@@ -28,6 +28,9 @@ fun NavGraph(
                 onNavigateToAddAccount = { navController.navigate(Screen.AddAccount.route) },
                 onNavigateToAccountDetail = { accountId ->
                     navController.navigate(Screen.AccountDetail.createRoute(accountId))
+                },
+                onNavigateToEditAccount = { accountId ->
+                    navController.navigate(Screen.EditAccount.createRoute(accountId))
                 }
             )
         }
@@ -42,9 +45,13 @@ fun NavGraph(
         composable(
             route = Screen.EditAccount.route,
             arguments = listOf(navArgument("accountId") { type = NavType.StringType })
-        ) {
-            // TODO: Edit Account screen will be implemented later
-            PlaceholderScreen(title = "Edit Account")
+        ) { backStackEntry ->
+            val accountId = backStackEntry.arguments?.getString("accountId") ?: return@composable
+            dev.aulianenko.myfinances.ui.screens.account.EditAccountScreen(
+                accountId = accountId,
+                onNavigateBack = { navController.popBackStack() },
+                onAccountSaved = { navController.popBackStack() }
+            )
         }
 
         composable(

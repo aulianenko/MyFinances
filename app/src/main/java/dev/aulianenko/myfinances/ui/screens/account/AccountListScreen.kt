@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -43,6 +44,7 @@ import java.util.Locale
 fun AccountListScreen(
     onNavigateToAddAccount: () -> Unit,
     onNavigateToAccountDetail: (String) -> Unit,
+    onNavigateToEditAccount: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -91,6 +93,7 @@ fun AccountListScreen(
                         AccountListItem(
                             account = account,
                             onClick = { onNavigateToAccountDetail(account.id) },
+                            onEdit = { onNavigateToEditAccount(account.id) },
                             onDelete = { viewModel.deleteAccount(account) }
                         )
                     }
@@ -104,6 +107,7 @@ fun AccountListScreen(
 fun AccountListItem(
     account: Account,
     onClick: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -143,12 +147,21 @@ fun AccountListItem(
                 )
             }
 
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Account",
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Account",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Account",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
