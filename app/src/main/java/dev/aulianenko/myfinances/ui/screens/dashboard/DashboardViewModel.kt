@@ -2,6 +2,7 @@ package dev.aulianenko.myfinances.ui.screens.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.aulianenko.myfinances.data.repository.AccountRepository
 import dev.aulianenko.myfinances.domain.model.PortfolioStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class DashboardUiState(
     val portfolioStatistics: PortfolioStatistics? = null,
@@ -18,7 +20,8 @@ data class DashboardUiState(
     val isLoading: Boolean = true
 )
 
-class DashboardViewModel(
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
     private val repository: AccountRepository
 ) : ViewModel() {
 

@@ -2,6 +2,7 @@ package dev.aulianenko.myfinances.ui.screens.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.aulianenko.myfinances.data.entity.Account
 import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.data.repository.AccountRepository
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class AccountWithValue(
     val account: Account,
@@ -21,7 +23,8 @@ data class AccountListUiState(
     val isLoading: Boolean = true
 )
 
-class AccountListViewModel(
+@HiltViewModel
+class AccountListViewModel @Inject constructor(
     private val repository: AccountRepository
 ) : ViewModel() {
 
