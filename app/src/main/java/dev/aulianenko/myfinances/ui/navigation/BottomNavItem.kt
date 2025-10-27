@@ -2,6 +2,7 @@ package dev.aulianenko.myfinances.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -23,6 +24,12 @@ sealed class BottomNavItem(
         icon = Icons.Default.List
     )
 
+    data object Analytics : BottomNavItem(
+        route = Screen.Analytics.route,
+        title = "Analytics",
+        icon = Icons.Default.Info
+    )
+
     data object Settings : BottomNavItem(
         route = Screen.Settings.route,
         title = "Settings",
@@ -30,6 +37,6 @@ sealed class BottomNavItem(
     )
 
     companion object {
-        val items = listOf(Dashboard, Accounts, Settings)
+        val items = listOf(Dashboard, Accounts, Analytics, Settings)
     }
 }

@@ -93,6 +93,10 @@ fun NavGraph(
             )
         }
 
+        composable(Screen.Analytics.route) {
+            dev.aulianenko.myfinances.ui.screens.analytics.AnalyticsScreen()
+        }
+
         composable(Screen.Settings.route) {
             // TODO: Settings screen will be implemented later
             PlaceholderScreen(title = "Settings")
