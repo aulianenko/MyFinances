@@ -18,6 +18,7 @@ data class AddAccountValueUiState(
     val account: Account? = null,
     val value: String = "",
     val note: String = "",
+    val timestamp: Long = System.currentTimeMillis(),
     val isLoading: Boolean = true,
     val isSaved: Boolean = false,
     val errorMessage: String? = null
@@ -59,6 +60,10 @@ class AddAccountValueViewModel @Inject constructor(
         _uiState.update { it.copy(note = note) }
     }
 
+    fun onTimestampChange(timestamp: Long) {
+        _uiState.update { it.copy(timestamp = timestamp) }
+    }
+
     fun saveAccountValue() {
         val currentState = _uiState.value
 
@@ -84,6 +89,7 @@ class AddAccountValueViewModel @Inject constructor(
                 val accountValue = AccountValue(
                     accountId = accountId,
                     value = valueDouble,
+                    timestamp = currentState.timestamp,
                     note = currentState.note.trim().ifBlank { null }
                 )
                 repository.insertAccountValue(accountValue)

@@ -22,6 +22,7 @@ data class AccountValueInput(
 data class BulkUpdateUiState(
     val accountInputs: List<AccountValueInput> = emptyList(),
     val note: String = "",
+    val timestamp: Long = System.currentTimeMillis(),
     val isLoading: Boolean = true,
     val isSaved: Boolean = false,
     val errorMessage: String? = null,
@@ -75,6 +76,10 @@ class BulkUpdateViewModel @Inject constructor(
         _uiState.update { it.copy(note = note) }
     }
 
+    fun onTimestampChange(timestamp: Long) {
+        _uiState.update { it.copy(timestamp = timestamp) }
+    }
+
     fun saveAllValues() {
         val currentState = _uiState.value
         val inputsWithValues = currentState.accountInputs.filter { it.hasValue }
@@ -106,14 +111,13 @@ class BulkUpdateViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val timestamp = System.currentTimeMillis()
                 val note = currentState.note.trim().ifBlank { null }
 
                 inputsWithValues.forEach { input ->
                     val accountValue = AccountValue(
                         accountId = input.account.id,
                         value = input.value.toDouble(),
-                        timestamp = timestamp,
+                        timestamp = currentState.timestamp,
                         note = note
                     )
                     repository.insertAccountValue(accountValue)
