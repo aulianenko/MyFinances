@@ -18,6 +18,7 @@ import javax.inject.Inject
 
 data class DashboardUiState(
     val portfolioStatistics: PortfolioStatistics? = null,
+    val portfolioValueHistory: List<Double> = emptyList(),
     val selectedPeriod: TimePeriod = TimePeriod.THREE_MONTHS,
     val isLoading: Boolean = true
 )
@@ -36,12 +37,18 @@ class DashboardViewModel @Inject constructor(
                 .map { it.selectedPeriod }
                 .distinctUntilChanged()
                 .flatMapLatest { period ->
-                    calculateStatisticsUseCase.getPortfolioStatistics(period)
+                    kotlinx.coroutines.flow.combine(
+                        calculateStatisticsUseCase.getPortfolioStatistics(period),
+                        calculateStatisticsUseCase.getPortfolioValueHistory(period)
+                    ) { statistics, history ->
+                        Pair(statistics, history)
+                    }
                 }
-                .collect { statistics ->
+                .collect { (statistics, history) ->
                     _uiState.update {
                         it.copy(
                             portfolioStatistics = statistics,
+                            portfolioValueHistory = history,
                             isLoading = false
                         )
                     }

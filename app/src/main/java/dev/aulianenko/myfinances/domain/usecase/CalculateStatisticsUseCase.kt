@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CalculateStatisticsUseCase @Inject constructor(
@@ -114,5 +115,47 @@ class CalculateStatisticsUseCase @Inject constructor(
             valueCount = valuesInPeriod.size,
             period = period
         )
+    }
+
+    fun getPortfolioValueHistory(period: TimePeriod): Flow<List<Double>> {
+        return repository.getAllAccounts().flatMapLatest { accounts ->
+            if (accounts.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    repository.getAllAccountValuesInPeriod(
+                        period.getStartTimestamp(),
+                        period.getEndTimestamp()
+                    ),
+                    currencyConversionUseCase.getAllExchangeRates(),
+                    userPreferencesRepository.baseCurrency
+                ) { allValues, exchangeRates, baseCurrency ->
+                    // Group values by timestamp and account
+                    val accountMap = accounts.associateBy { it.id }
+                    val ratesMap = exchangeRates.associate { it.currencyCode to it.rateToUSD }
+                    val baseRate = ratesMap[baseCurrency] ?: 1.0
+
+                    // Group account values by timestamp
+                    val valuesByTimestamp = allValues
+                        .groupBy { it.timestamp }
+                        .toSortedMap()
+
+                    // For each timestamp, calculate total portfolio value
+                    valuesByTimestamp.map { (_, values) ->
+                        values.sumOf { accountValue ->
+                            val account = accountMap[accountValue.accountId]
+                            if (account != null) {
+                                val currencyRate = ratesMap[account.currency] ?: 1.0
+                                // Convert to base currency
+                                val amountInUSD = accountValue.value * currencyRate
+                                amountInUSD / baseRate
+                            } else {
+                                0.0
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -42,6 +42,7 @@ import dev.aulianenko.myfinances.domain.model.AccountStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.EmptyState
+import dev.aulianenko.myfinances.ui.components.LineChart
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
 import dev.aulianenko.myfinances.ui.components.PieChart
 import dev.aulianenko.myfinances.ui.components.PieChartData
@@ -167,6 +168,33 @@ fun DashboardScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
+                        }
+                    }
+                }
+
+                // Portfolio Value Trend Chart
+                if (uiState.portfolioValueHistory.isNotEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Portfolio Value Trend",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                LineChart(
+                                    data = uiState.portfolioValueHistory,
+                                    lineColor = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }
