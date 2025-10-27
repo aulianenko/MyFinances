@@ -7,49 +7,50 @@ import dev.aulianenko.myfinances.domain.model.PortfolioStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 
 class CalculateStatisticsUseCase(
     private val repository: AccountRepository
 ) {
-    suspend fun getPortfolioStatistics(period: TimePeriod): Flow<PortfolioStatistics> {
-        val accounts = repository.getAllAccounts().firstOrNull() ?: emptyList()
+    fun getPortfolioStatistics(period: TimePeriod): Flow<PortfolioStatistics> {
+        return repository.getAllAccounts().flatMapLatest { accounts ->
+            if (accounts.isEmpty()) {
+                flowOf(
+                    PortfolioStatistics(
+                        totalAccounts = 0,
+                        accountStatistics = emptyList(),
+                        period = period
+                    )
+                )
+            } else {
+                val accountStatsFlows = accounts.map { account ->
+                    combine(
+                        repository.getLatestAccountValue(account.id),
+                        repository.getAccountValuesInPeriod(
+                            account.id,
+                            period.getStartTimestamp(),
+                            period.getEndTimestamp()
+                        )
+                    ) { latestValue, valuesInPeriod ->
+                        calculateAccountStatistics(
+                            accountId = account.id,
+                            accountName = account.name,
+                            currency = account.currency,
+                            latestValue = latestValue,
+                            valuesInPeriod = valuesInPeriod,
+                            period = period
+                        )
+                    }
+                }
 
-        val accountStatsFlows = accounts.map { account ->
-            combine(
-                repository.getLatestAccountValue(account.id),
-                repository.getAccountValuesInPeriod(
-                    account.id,
-                    period.getStartTimestamp(),
-                    period.getEndTimestamp()
-                )
-            ) { latestValue, valuesInPeriod ->
-                calculateAccountStatistics(
-                    accountId = account.id,
-                    accountName = account.name,
-                    currency = account.currency,
-                    latestValue = latestValue,
-                    valuesInPeriod = valuesInPeriod,
-                    period = period
-                )
-            }
-        }
-
-        return if (accountStatsFlows.isEmpty()) {
-            kotlinx.coroutines.flow.flowOf(
-                PortfolioStatistics(
-                    totalAccounts = 0,
-                    accountStatistics = emptyList(),
-                    period = period
-                )
-            )
-        } else {
-            combine(accountStatsFlows) { statsArray ->
-                PortfolioStatistics(
-                    totalAccounts = accounts.size,
-                    accountStatistics = statsArray.toList(),
-                    period = period
-                )
+                combine(accountStatsFlows) { statsArray ->
+                    PortfolioStatistics(
+                        totalAccounts = accounts.size,
+                        accountStatistics = statsArray.toList(),
+                        period = period
+                    )
+                }
             }
         }
     }
