@@ -3,7 +3,6 @@ package dev.aulianenko.myfinances.ui.screens.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.aulianenko.myfinances.data.repository.AccountRepository
 import dev.aulianenko.myfinances.domain.model.PortfolioStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
 import dev.aulianenko.myfinances.domain.usecase.CalculateStatisticsUseCase
@@ -25,10 +24,8 @@ data class DashboardUiState(
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val repository: AccountRepository
+    private val calculateStatisticsUseCase: CalculateStatisticsUseCase
 ) : ViewModel() {
-
-    private val calculateStatisticsUseCase = CalculateStatisticsUseCase(repository)
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()

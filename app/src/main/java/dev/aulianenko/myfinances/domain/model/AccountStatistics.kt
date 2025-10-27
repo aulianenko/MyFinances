@@ -16,5 +16,7 @@ data class PortfolioStatistics(
     val totalAccounts: Int,
     val accountStatistics: List<AccountStatistics>,
     val period: TimePeriod,
+    val totalValueInBaseCurrency: Double = 0.0,
+    val baseCurrency: String = "USD",
     val lastUpdated: Long = System.currentTimeMillis()
 )

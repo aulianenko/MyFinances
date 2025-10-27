@@ -124,39 +124,45 @@ fun DashboardScreen(
                     }
                 }
 
-                // Summary Card
+                // Summary Card - Total Portfolio Value
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(24.dp)
                     ) {
-                        Column {
-                            Text(
-                                text = "Total Accounts",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "${uiState.portfolioStatistics?.totalAccounts ?: 0}",
-                                style = MaterialTheme.typography.headlineLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                        Text(
+                            text = "Total Portfolio Value",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val totalValue = uiState.portfolioStatistics?.totalValueInBaseCurrency ?: 0.0
+                        val baseCurrency = CurrencyProvider.getCurrencyByCode(
+                            uiState.portfolioStatistics?.baseCurrency ?: "USD"
+                        )
+                        val numberFormat = remember {
+                            NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+                                minimumFractionDigits = 2
+                                maximumFractionDigits = 2
+                            }
                         }
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(8.dp)
+                        Text(
+                            text = "${baseCurrency?.symbol ?: ""} ${numberFormat.format(totalValue)}",
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "${uiState.portfolioStatistics?.totalAccounts ?: 0} accounts • ${baseCurrency?.code ?: "USD"}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }

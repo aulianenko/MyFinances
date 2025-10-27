@@ -2,6 +2,7 @@ package dev.aulianenko.myfinances.domain.usecase
 
 import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.data.repository.AccountRepository
+import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
 import dev.aulianenko.myfinances.domain.model.AccountStatistics
 import dev.aulianenko.myfinances.domain.model.PortfolioStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
@@ -9,47 +10,75 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import javax.inject.Inject
 
-class CalculateStatisticsUseCase(
-    private val repository: AccountRepository
+class CalculateStatisticsUseCase @Inject constructor(
+    private val repository: AccountRepository,
+    private val currencyConversionUseCase: CurrencyConversionUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) {
     fun getPortfolioStatistics(period: TimePeriod): Flow<PortfolioStatistics> {
         return repository.getAllAccounts().flatMapLatest { accounts ->
-            if (accounts.isEmpty()) {
-                flowOf(
-                    PortfolioStatistics(
-                        totalAccounts = 0,
-                        accountStatistics = emptyList(),
-                        period = period
-                    )
-                )
-            } else {
-                val accountStatsFlows = accounts.map { account ->
-                    combine(
-                        repository.getLatestAccountValue(account.id),
-                        repository.getAccountValuesInPeriod(
-                            account.id,
-                            period.getStartTimestamp(),
-                            period.getEndTimestamp()
+            userPreferencesRepository.baseCurrency.flatMapLatest { baseCurrency ->
+                if (accounts.isEmpty()) {
+                    flowOf(
+                        PortfolioStatistics(
+                            totalAccounts = 0,
+                            accountStatistics = emptyList(),
+                            period = period,
+                            totalValueInBaseCurrency = 0.0,
+                            baseCurrency = baseCurrency
                         )
-                    ) { latestValue, valuesInPeriod ->
-                        calculateAccountStatistics(
-                            accountId = account.id,
-                            accountName = account.name,
-                            currency = account.currency,
-                            latestValue = latestValue,
-                            valuesInPeriod = valuesInPeriod,
-                            period = period
+                    )
+                } else {
+                    val accountStatsFlows = accounts.map { account ->
+                        combine(
+                            repository.getLatestAccountValue(account.id),
+                            repository.getAccountValuesInPeriod(
+                                account.id,
+                                period.getStartTimestamp(),
+                                period.getEndTimestamp()
+                            )
+                        ) { latestValue, valuesInPeriod ->
+                            calculateAccountStatistics(
+                                accountId = account.id,
+                                accountName = account.name,
+                                currency = account.currency,
+                                latestValue = latestValue,
+                                valuesInPeriod = valuesInPeriod,
+                                period = period
+                            )
+                        }
+                    }
+
+                    combine(
+                        combine(accountStatsFlows) { it.toList() },
+                        currencyConversionUseCase.getAllExchangeRates()
+                    ) { statsArray, exchangeRates ->
+                        // Calculate total value in base currency
+                        val currencyAmounts = statsArray.groupBy { it.currency }
+                            .mapValues { (_, stats) -> stats.sumOf { it.currentValue } }
+
+                        // Get exchange rates map
+                        val ratesMap = exchangeRates.associate { it.currencyCode to it.rateToUSD }
+                        val baseRate = ratesMap[baseCurrency] ?: 1.0
+
+                        // Convert each currency amount to base currency
+                        val totalInBaseCurrency = currencyAmounts.entries.sumOf { (currency, amount) ->
+                            val currencyRate = ratesMap[currency] ?: 1.0
+                            // Convert: amount -> USD -> base currency
+                            val amountInUSD = amount * currencyRate
+                            amountInUSD / baseRate
+                        }
+
+                        PortfolioStatistics(
+                            totalAccounts = accounts.size,
+                            accountStatistics = statsArray,
+                            period = period,
+                            totalValueInBaseCurrency = totalInBaseCurrency,
+                            baseCurrency = baseCurrency
                         )
                     }
-                }
-
-                combine(accountStatsFlows) { statsArray ->
-                    PortfolioStatistics(
-                        totalAccounts = accounts.size,
-                        accountStatistics = statsArray.toList(),
-                        period = period
-                    )
                 }
             }
         }
