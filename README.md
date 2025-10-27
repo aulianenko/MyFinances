@@ -12,19 +12,27 @@ A modern Android app for tracking personal finances across multiple accounts wit
 ### ✅ Implemented
 
 - **Account Management** - Create, edit, delete accounts with multi-currency support
-- **Value Tracking** - Record account values with timestamps and notes
-- **Bulk Updates** - Update multiple accounts simultaneously
-- **Dashboard Analytics** - Portfolio overview with statistics across different time periods
-- **Historical Data** - View complete value history for each account
-- **Multi-Currency** - Support for 26 major world currencies
+- **Value Tracking** - Record account values with custom dates and notes
+- **Historical Dates** - Add values for past dates with date picker
+- **Bulk Updates** - Update multiple accounts simultaneously with shared date
+- **Dashboard Analytics** - Portfolio overview with statistics and trends
+- **Charts & Visualizations** - Portfolio value trend and distribution charts
+- **Historical Data** - View complete value history for each account with charts
+- **Multi-Currency** - Support for 30+ world currencies with exchange rates
+- **Currency Conversion** - Portfolio totals in base currency with real-time conversion
+- **Currency Converter** - Utility to convert between any currencies in Settings
+- **Settings Screen** - Base currency preference and currency converter
+- **Advanced Analytics** - Performance metrics, volatility, and correlations
+- **Scrollable Screens** - All screens properly scroll for any content size
 - **Dark Mode** - Full Material 3 theming with dark mode support
 - **Bottom Navigation** - Intuitive navigation between main sections
 
 ### 🚧 Planned
 
-- **Charts & Visualizations** - Line charts and pie charts for data visualization
 - **Biometric Authentication** - Secure app with fingerprint/face unlock
-- **Settings & Preferences** - Customizable app behavior and theme toggle
+- **Export/Import** - Backup and restore data in CSV/JSON formats
+- **Cloud Sync** - Multi-device synchronization
+- **Budget Tracking** - Set and track budgets across accounts
 
 ## Screenshots
 
@@ -35,7 +43,10 @@ _Coming soon..._
 - **Language:** Kotlin 2.0.21
 - **UI Framework:** Jetpack Compose with Material 3
 - **Architecture:** MVVM (Model-View-ViewModel)
+- **Dependency Injection:** Hilt (Dagger)
 - **Database:** Room 2.6.1
+- **Charts:** Vico 2.0.0-alpha.28
+- **Preferences:** DataStore 1.1.1
 - **Navigation:** Navigation Compose 2.8.5
 - **Minimum SDK:** 28 (Android 9.0)
 - **Target SDK:** 36 (Android 14.0)
@@ -85,17 +96,20 @@ app/src/main/java/dev/aulianenko/myfinances/
 │   ├── database/         # Room database configuration
 │   ├── entity/           # Database entities
 │   └── repository/       # Data repositories
+├── di/                   # Hilt dependency injection modules
 ├── domain/
 │   ├── model/            # Domain models
 │   ├── usecase/          # Business use cases
 │   └── Currency.kt       # Currency definitions
 └── ui/
-    ├── components/       # Reusable UI components
+    ├── components/       # Reusable UI components (charts, inputs, etc.)
     ├── navigation/       # Navigation setup
     ├── screens/          # Feature screens
     │   ├── account/      # Account management
     │   ├── accountvalue/ # Value tracking
-    │   └── dashboard/    # Analytics dashboard
+    │   ├── analytics/    # Advanced analytics
+    │   ├── dashboard/    # Analytics dashboard
+    │   └── settings/     # App settings
     └── theme/            # Material 3 theming
 ```
 
@@ -181,12 +195,19 @@ The project follows Kotlin coding conventions and uses:
 - `id` (String) - UUID primary key
 - `accountId` (String) - Foreign key to Account
 - `value` (Double) - Account value
-- `timestamp` (Long) - Value timestamp
+- `timestamp` (Long) - Value timestamp (user-selectable)
 - `note` (String?) - Optional note
+
+**ExchangeRate**
+- `id` (String) - UUID primary key
+- `currencyCode` (String) - Currency code (unique index)
+- `rateToUSD` (Double) - Exchange rate to USD
+- `lastUpdated` (Long) - Last update timestamp
 
 ### Relationships
 - One Account → Many AccountValues
 - Cascade delete on Account removal
+- Exchange rates independent, default values initialized on first launch
 
 ## Supported Currencies
 
@@ -214,12 +235,20 @@ Story X.Y: Brief description
 
 ## Version History
 
-- **1.0** (Current)
-  - Account management
-  - Value tracking
-  - Bulk updates
-  - Dashboard analytics
-  - Multi-currency support
+- **1.0** (Current - October 2025)
+  - Account management with CRUD operations
+  - Value tracking with custom dates
+  - Bulk updates with shared timestamps
+  - Dashboard analytics with time period filtering
+  - Charts & visualizations (line charts, pie charts)
+  - Multi-currency support (30+ currencies)
+  - Currency conversion with exchange rates
+  - Currency converter utility in Settings
+  - Advanced analytics (performance, volatility, correlations)
+  - Base currency preference with DataStore
+  - Hilt dependency injection
+  - Scrollable screens for all content
+  - Material 3 design with dark mode
 
 ## License
 
@@ -228,6 +257,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Built with [Jetpack Compose](https://developer.android.com/jetpack/compose)
+- Charts powered by [Vico](https://github.com/patrykandpatrick/vico)
+- Dependency injection with [Hilt](https://dagger.dev/hilt/)
 - Icons from [Material Icons](https://fonts.google.com/icons)
 - Architecture inspired by [Android Architecture Components](https://developer.android.com/topic/architecture)
 
