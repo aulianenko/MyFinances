@@ -98,8 +98,7 @@ fun NavGraph(
         }
 
         composable(Screen.Settings.route) {
-            // TODO: Settings screen will be implemented later
-            PlaceholderScreen(title = "Settings")
+            dev.aulianenko.myfinances.ui.screens.settings.SettingsScreen()
         }
     }
 }
