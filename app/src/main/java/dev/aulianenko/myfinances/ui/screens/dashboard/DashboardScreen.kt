@@ -84,7 +84,7 @@ fun DashboardScreen(
                 description = "Create an account to start tracking your finances"
             )
         } else {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -92,133 +92,136 @@ fun DashboardScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Period Selector
-                ExposedDropdownMenuBox(
-                    expanded = periodExpanded,
-                    onExpandedChange = { periodExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = uiState.selectedPeriod.displayName,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Time Period") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = periodExpanded) },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-
-                    ExposedDropdownMenu(
+                item {
+                    ExposedDropdownMenuBox(
                         expanded = periodExpanded,
-                        onDismissRequest = { periodExpanded = false }
+                        onExpandedChange = { periodExpanded = it }
                     ) {
-                        TimePeriod.entries.forEach { period ->
-                            DropdownMenuItem(
-                                text = { Text(period.displayName) },
-                                onClick = {
-                                    viewModel.onPeriodChange(period)
-                                    periodExpanded = false
-                                }
-                            )
+                        OutlinedTextField(
+                            value = uiState.selectedPeriod.displayName,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Time Period") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = periodExpanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = periodExpanded,
+                            onDismissRequest = { periodExpanded = false }
+                        ) {
+                            TimePeriod.entries.forEach { period ->
+                                DropdownMenuItem(
+                                    text = { Text(period.displayName) },
+                                    onClick = {
+                                        viewModel.onPeriodChange(period)
+                                        periodExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
 
                 // Summary Card - Total Portfolio Value
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp)
-                    ) {
-                        Text(
-                            text = "Total Portfolio Value",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        val totalValue = uiState.portfolioStatistics?.totalValueInBaseCurrency ?: 0.0
-                        val baseCurrency = CurrencyProvider.getCurrencyByCode(
-                            uiState.portfolioStatistics?.baseCurrency ?: "USD"
-                        )
-                        val numberFormat = remember {
-                            NumberFormat.getNumberInstance(Locale.getDefault()).apply {
-                                minimumFractionDigits = 2
-                                maximumFractionDigits = 2
-                            }
-                        }
-                        Text(
-                            text = "${baseCurrency?.symbol ?: ""} ${numberFormat.format(totalValue)}",
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "${uiState.portfolioStatistics?.totalAccounts ?: 0} accounts • ${baseCurrency?.code ?: "USD"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-
-                // Portfolio Distribution
-                val portfolioData = remember(uiState.portfolioStatistics) {
-                    val stats = uiState.portfolioStatistics?.accountStatistics ?: emptyList()
-                    val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
-                        minimumFractionDigits = 2
-                        maximumFractionDigits = 2
-                    }
-
-                    stats.mapIndexed { index, accountStats ->
-                        val currency = CurrencyProvider.getCurrencyByCode(accountStats.currency)
-                        PieChartData(
-                            label = accountStats.accountName,
-                            value = accountStats.currentValue,
-                            formattedValue = "${currency?.symbol ?: ""} ${numberFormat.format(accountStats.currentValue)}"
-                        )
-                    }
-                }
-
-                if (portfolioData.isNotEmpty()) {
+                item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(24.dp)
                         ) {
-                            PieChart(
-                                data = portfolioData,
-                                showPercentages = true
+                            Text(
+                                text = "Total Portfolio Value",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            val totalValue = uiState.portfolioStatistics?.totalValueInBaseCurrency ?: 0.0
+                            val baseCurrency = CurrencyProvider.getCurrencyByCode(
+                                uiState.portfolioStatistics?.baseCurrency ?: "USD"
+                            )
+                            val numberFormat = remember {
+                                NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+                                    minimumFractionDigits = 2
+                                    maximumFractionDigits = 2
+                                }
+                            }
+                            Text(
+                                text = "${baseCurrency?.symbol ?: ""} ${numberFormat.format(totalValue)}",
+                                style = MaterialTheme.typography.headlineLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${uiState.portfolioStatistics?.totalAccounts ?: 0} accounts • ${baseCurrency?.code ?: "USD"}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
                 }
 
-                // Account Statistics
-                Text(
-                    text = "Account Performance",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                // Portfolio Distribution
+                item {
+                    val portfolioData = remember(uiState.portfolioStatistics) {
+                        val stats = uiState.portfolioStatistics?.accountStatistics ?: emptyList()
+                        val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+                            minimumFractionDigits = 2
+                            maximumFractionDigits = 2
+                        }
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.portfolioStatistics?.accountStatistics ?: emptyList()) { stats ->
-                        AccountStatisticsCard(
-                            statistics = stats,
-                            onClick = { onNavigateToAccountDetail(stats.accountId) }
-                        )
+                        stats.mapIndexed { index, accountStats ->
+                            val currency = CurrencyProvider.getCurrencyByCode(accountStats.currency)
+                            PieChartData(
+                                label = accountStats.accountName,
+                                value = accountStats.currentValue,
+                                formattedValue = "${currency?.symbol ?: ""} ${numberFormat.format(accountStats.currentValue)}"
+                            )
+                        }
                     }
+
+                    if (portfolioData.isNotEmpty()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                PieChart(
+                                    data = portfolioData,
+                                    showPercentages = true
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Account Statistics
+                item {
+                    Text(
+                        text = "Account Performance",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                items(uiState.portfolioStatistics?.accountStatistics ?: emptyList()) { stats ->
+                    AccountStatisticsCard(
+                        statistics = stats,
+                        onClick = { onNavigateToAccountDetail(stats.accountId) }
+                    )
                 }
             }
         }

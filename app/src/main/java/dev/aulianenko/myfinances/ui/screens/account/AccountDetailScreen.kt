@@ -104,154 +104,155 @@ fun AccountDetailScreen(
                     maximumFractionDigits = 2
                 } }
 
-                Column(
+                var selectedPeriod by remember { mutableStateOf(TimePeriod.ALL) }
+
+                val filteredValues = remember(uiState.accountValues, selectedPeriod) {
+                    val currentTime = System.currentTimeMillis()
+                    val cutoffTime = when (selectedPeriod) {
+                        TimePeriod.SEVEN_DAYS -> currentTime - TimeUnit.DAYS.toMillis(7)
+                        TimePeriod.THIRTY_DAYS -> currentTime - TimeUnit.DAYS.toMillis(30)
+                        TimePeriod.NINETY_DAYS -> currentTime - TimeUnit.DAYS.toMillis(90)
+                        TimePeriod.ALL -> 0L
+                    }
+                    uiState.accountValues
+                        .filter { it.timestamp >= cutoffTime }
+                        .sortedBy { it.timestamp }
+                }
+
+                val chartData = remember(filteredValues) {
+                    filteredValues.map { it.value }
+                }
+
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(paddingValues),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Current Value Card
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    ) {
-                        Column(
+                    item {
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         ) {
-                            Text(
-                                text = "Current Value",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = if (uiState.latestValue != null) {
-                                    "${currency?.symbol ?: ""} ${numberFormat.format(uiState.latestValue!!.value)}"
-                                } else {
-                                    "No values recorded"
-                                },
-                                style = MaterialTheme.typography.headlineLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            if (uiState.latestValue != null) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(
-                                    text = currency?.name ?: uiState.account?.currency ?: "",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    text = "Current Value",
+                                    style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = if (uiState.latestValue != null) {
+                                        "${currency?.symbol ?: ""} ${numberFormat.format(uiState.latestValue!!.value)}"
+                                    } else {
+                                        "No values recorded"
+                                    },
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                if (uiState.latestValue != null) {
+                                    Text(
+                                        text = currency?.name ?: uiState.account?.currency ?: "",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
                             }
                         }
                     }
 
                     // Value Trend Chart
                     if (uiState.accountValues.isNotEmpty()) {
-                        var selectedPeriod by remember { mutableStateOf(TimePeriod.ALL) }
-
-                        val filteredValues = remember(uiState.accountValues, selectedPeriod) {
-                            val currentTime = System.currentTimeMillis()
-                            val cutoffTime = when (selectedPeriod) {
-                                TimePeriod.SEVEN_DAYS -> currentTime - TimeUnit.DAYS.toMillis(7)
-                                TimePeriod.THIRTY_DAYS -> currentTime - TimeUnit.DAYS.toMillis(30)
-                                TimePeriod.NINETY_DAYS -> currentTime - TimeUnit.DAYS.toMillis(90)
-                                TimePeriod.ALL -> 0L
-                            }
-                            uiState.accountValues
-                                .filter { it.timestamp >= cutoffTime }
-                                .sortedBy { it.timestamp }
-                        }
-
-                        val chartData = remember(filteredValues) {
-                            filteredValues.map { it.value }
-                        }
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                        ) {
-                            Column(
+                        item {
+                            Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
+                                    .padding(horizontal = 16.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                             ) {
-                                Text(
-                                    text = "Value Trend",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                // Time period filter chips
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
                                 ) {
-                                    items(TimePeriod.values()) { period ->
-                                        FilterChip(
-                                            selected = selectedPeriod == period,
-                                            onClick = { selectedPeriod = period },
-                                            label = { Text(period.label) }
+                                    Text(
+                                        text = "Value Trend",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // Time period filter chips
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        items(TimePeriod.values()) { period ->
+                                            FilterChip(
+                                                selected = selectedPeriod == period,
+                                                onClick = { selectedPeriod = period },
+                                                label = { Text(period.label) }
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    if (chartData.isNotEmpty()) {
+                                        LineChart(
+                                            data = chartData,
+                                            lineColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "No data for selected period",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(32.dp)
                                         )
                                     }
                                 }
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                if (chartData.isNotEmpty()) {
-                                    LineChart(
-                                        data = chartData,
-                                        lineColor = MaterialTheme.colorScheme.primary
-                                    )
-                                } else {
-                                    Text(
-                                        text = "No data for selected period",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(32.dp)
-                                    )
-                                }
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
 
                     // Value History
                     if (uiState.accountValues.isEmpty()) {
-                        EmptyState(
-                            title = "No Value History",
-                            description = "Add your first value update to start tracking"
-                        )
+                        item {
+                            EmptyState(
+                                title = "No Value History",
+                                description = "Add your first value update to start tracking"
+                            )
+                        }
                     } else {
-                        Text(
-                            text = "Value History",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
+                        item {
+                            Text(
+                                text = "Value History",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
 
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(uiState.accountValues) { accountValue ->
-                                AccountValueItem(
-                                    accountValue = accountValue,
-                                    currencySymbol = currency?.symbol ?: "",
-                                    onDelete = { viewModel.deleteAccountValue(accountValue) }
-                                )
-                            }
+                        items(uiState.accountValues) { accountValue ->
+                            AccountValueItem(
+                                accountValue = accountValue,
+                                currencySymbol = currency?.symbol ?: "",
+                                onDelete = { viewModel.deleteAccountValue(accountValue) },
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
                         }
                     }
                 }
