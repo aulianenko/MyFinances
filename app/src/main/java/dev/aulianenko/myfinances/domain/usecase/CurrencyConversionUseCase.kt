@@ -81,4 +81,11 @@ class CurrencyConversionUseCase @Inject constructor(
      */
     suspend fun needsInitialization(): Boolean =
         getExchangeRateCount() == 0
+
+    /**
+     * Fetch latest exchange rates from Frankfurter API and update database.
+     * @return Result with number of rates updated, or error
+     */
+    suspend fun updateExchangeRatesFromApi(): Result<Int> =
+        exchangeRateRepository.updateExchangeRatesFromApi()
 }
