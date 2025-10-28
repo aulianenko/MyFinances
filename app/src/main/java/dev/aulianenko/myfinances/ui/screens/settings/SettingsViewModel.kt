@@ -24,7 +24,12 @@ data class SettingsUiState(
     val convertedAmount: Double? = null,
     val exchangeRates: List<ExchangeRate> = emptyList(),
     val isLoading: Boolean = true,
-    val isGeneratingMockData: Boolean = false
+    val isGeneratingMockData: Boolean = false,
+    val showPortfolioValue: Boolean = true,
+    val showPortfolioTrend: Boolean = true,
+    val showPortfolioDistribution: Boolean = true,
+    val showPortfolioGrowth: Boolean = true,
+    val showBestWorstPerformers: Boolean = true
 )
 
 @HiltViewModel
@@ -61,6 +66,37 @@ class SettingsViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            // Load dashboard card visibility preferences
+            userPreferencesRepository.showPortfolioValue.collect { show ->
+                _uiState.update { it.copy(showPortfolioValue = show) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.showPortfolioTrend.collect { show ->
+                _uiState.update { it.copy(showPortfolioTrend = show) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.showPortfolioDistribution.collect { show ->
+                _uiState.update { it.copy(showPortfolioDistribution = show) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.showPortfolioGrowth.collect { show ->
+                _uiState.update { it.copy(showPortfolioGrowth = show) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.showBestWorstPerformers.collect { show ->
+                _uiState.update { it.copy(showBestWorstPerformers = show) }
             }
         }
     }
@@ -128,6 +164,36 @@ class SettingsViewModel @Inject constructor(
             } finally {
                 _uiState.update { it.copy(isGeneratingMockData = false) }
             }
+        }
+    }
+
+    fun setShowPortfolioValue(show: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setShowPortfolioValue(show)
+        }
+    }
+
+    fun setShowPortfolioTrend(show: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setShowPortfolioTrend(show)
+        }
+    }
+
+    fun setShowPortfolioDistribution(show: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setShowPortfolioDistribution(show)
+        }
+    }
+
+    fun setShowPortfolioGrowth(show: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setShowPortfolioGrowth(show)
+        }
+    }
+
+    fun setShowBestWorstPerformers(show: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setShowBestWorstPerformers(show)
         }
     }
 }

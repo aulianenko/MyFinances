@@ -214,6 +214,121 @@ fun SettingsScreen(
                     }
                 }
 
+                // Dashboard Customization
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Dashboard Customization",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Show or hide cards on your dashboard",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                FilterChip(
+                                    selected = uiState.showPortfolioValue,
+                                    onClick = { viewModel.setShowPortfolioValue(!uiState.showPortfolioValue) },
+                                    label = {
+                                        Text(
+                                            text = "Total Portfolio Value",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                )
+
+                                FilterChip(
+                                    selected = uiState.showPortfolioTrend,
+                                    onClick = { viewModel.setShowPortfolioTrend(!uiState.showPortfolioTrend) },
+                                    label = {
+                                        Text(
+                                            text = "Portfolio Trend Chart",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                )
+
+                                FilterChip(
+                                    selected = uiState.showPortfolioDistribution,
+                                    onClick = { viewModel.setShowPortfolioDistribution(!uiState.showPortfolioDistribution) },
+                                    label = {
+                                        Text(
+                                            text = "Portfolio Distribution",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                )
+
+                                FilterChip(
+                                    selected = uiState.showPortfolioGrowth,
+                                    onClick = { viewModel.setShowPortfolioGrowth(!uiState.showPortfolioGrowth) },
+                                    label = {
+                                        Text(
+                                            text = "Portfolio Growth",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                )
+
+                                FilterChip(
+                                    selected = uiState.showBestWorstPerformers,
+                                    onClick = { viewModel.setShowBestWorstPerformers(!uiState.showBestWorstPerformers) },
+                                    label = {
+                                        Text(
+                                            text = "Best/Worst Performers",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Mock Data Generator
                 item {
                     Card(
