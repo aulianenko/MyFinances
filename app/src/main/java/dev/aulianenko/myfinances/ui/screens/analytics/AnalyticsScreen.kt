@@ -10,22 +10,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -40,14 +36,12 @@ import dev.aulianenko.myfinances.ui.components.LoadingIndicator
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyticsScreen(
     modifier: Modifier = Modifier,
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var periodExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -67,37 +61,40 @@ fun AnalyticsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Period Selector
-                ExposedDropdownMenuBox(
-                    expanded = periodExpanded,
-                    onExpandedChange = { periodExpanded = it }
+                // Period Selector - Filter chips style
+                Column(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedTextField(
-                        value = uiState.selectedPeriod.displayName,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Time Period") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = periodExpanded) },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
+                    Text(
+                        text = "TIME PERIOD",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold
                     )
-
-                    ExposedDropdownMenu(
-                        expanded = periodExpanded,
-                        onDismissRequest = { periodExpanded = false }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         TimePeriod.entries.forEach { period ->
-                            DropdownMenuItem(
-                                text = { Text(period.displayName) },
-                                onClick = {
-                                    viewModel.onPeriodChange(period)
-                                    periodExpanded = false
-                                }
+                            FilterChip(
+                                selected = uiState.selectedPeriod == period,
+                                onClick = { viewModel.onPeriodChange(period) },
+                                label = {
+                                    Text(
+                                        text = period.displayName,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (uiState.selectedPeriod == period) FontWeight.SemiBold else FontWeight.Normal
+                                    )
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
                             )
                         }
                     }
@@ -109,42 +106,42 @@ fun AnalyticsScreen(
                 if (analytics != null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp)
+                                .padding(24.dp)
                         ) {
                             Text(
                                 text = "Portfolio Growth",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
                             val numberFormat = remember {
                                 NumberFormat.getNumberInstance(Locale.getDefault()).apply {
                                     minimumFractionDigits = 2
                                     maximumFractionDigits = 2
                                 }
                             }
+                            val isPositive = analytics.totalPortfolioGrowth >= 0
                             Text(
-                                text = "${if (analytics.totalPortfolioGrowth >= 0) "+" else ""}${numberFormat.format(analytics.totalPortfolioGrowth)}%",
-                                style = MaterialTheme.typography.headlineLarge,
+                                text = "${if (isPositive) "+" else ""}${numberFormat.format(analytics.totalPortfolioGrowth)}%",
+                                style = MaterialTheme.typography.displayMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (analytics.totalPortfolioGrowth >= 0) {
-                                    MaterialTheme.colorScheme.tertiary
-                                } else {
-                                    MaterialTheme.colorScheme.error
-                                }
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Average: ${if (analytics.averageGrowthRate >= 0) "+" else ""}${numberFormat.format(analytics.averageGrowthRate)}%",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.75f)
                             )
                         }
                     }
@@ -157,35 +154,39 @@ fun AnalyticsScreen(
                         analytics.bestPerformer?.let { best ->
                             Card(
                                 modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
                                 )
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp)
+                                        .padding(20.dp)
                                 ) {
                                     Text(
                                         text = "Best Performer",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     Text(
                                         text = best.accountName,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
                                     )
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = "+${NumberFormat.getNumberInstance(Locale.getDefault()).apply {
                                             minimumFractionDigits = 2
                                             maximumFractionDigits = 2
                                         }.format(best.totalGainPercentage)}%",
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                        color = MaterialTheme.colorScheme.secondary
                                     )
                                 }
                             }
@@ -194,6 +195,8 @@ fun AnalyticsScreen(
                         analytics.worstPerformer?.let { worst ->
                             Card(
                                 modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.errorContainer
                                 )
@@ -201,28 +204,30 @@ fun AnalyticsScreen(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp)
+                                        .padding(20.dp)
                                 ) {
                                     Text(
                                         text = "Worst Performer",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = worst.accountName,
-                                        style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onErrorContainer
                                     )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = worst.accountName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = "${if (worst.totalGainPercentage >= 0) "+" else ""}${NumberFormat.getNumberInstance(Locale.getDefault()).apply {
                                             minimumFractionDigits = 2
                                             maximumFractionDigits = 2
                                         }.format(worst.totalGainPercentage)}%",
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                        color = MaterialTheme.colorScheme.error
                                     )
                                 }
                             }
@@ -232,12 +237,13 @@ fun AnalyticsScreen(
                     // Account Performance List
                     Text(
                         text = "Account Performance",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(analytics.accountPerformances.sortedByDescending { it.totalGainPercentage }) { performance ->
                             AccountPerformanceCard(performance = performance)
@@ -266,20 +272,24 @@ fun AccountPerformanceCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(20.dp)
         ) {
             Text(
                 text = performance.accountName,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -293,15 +303,16 @@ fun AccountPerformanceCard(
                     )
                     val isPositive = performance.totalGain >= 0
                     Text(
-                        text = "${if (isPositive) "+" else ""}${currency?.symbol ?: ""} ${numberFormat.format(performance.totalGain)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isPositive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
+                        text = "${if (isPositive) "+" else ""}${currency?.symbol ?: ""}${numberFormat.format(performance.totalGain)}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (isPositive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "${if (isPositive) "+" else ""}${numberFormat.format(performance.totalGainPercentage)}%",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (isPositive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (isPositive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
