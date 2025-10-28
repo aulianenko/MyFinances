@@ -8,6 +8,9 @@
     <!-- Schedule exact alarms for reminders -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
+    <!-- Internet access for fetching exchange rates -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".MyFinancesApplication"
         android:allowBackup="true"
