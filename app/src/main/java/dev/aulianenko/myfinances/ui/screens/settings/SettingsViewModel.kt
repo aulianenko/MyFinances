@@ -8,6 +8,7 @@ import dev.aulianenko.myfinances.data.entity.ExchangeRate
 import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
 import dev.aulianenko.myfinances.domain.usecase.CurrencyConversionUseCase
+import dev.aulianenko.myfinances.notification.NotificationScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,14 +30,17 @@ data class SettingsUiState(
     val showPortfolioTrend: Boolean = true,
     val showPortfolioDistribution: Boolean = true,
     val showPortfolioGrowth: Boolean = true,
-    val showBestWorstPerformers: Boolean = true
+    val showBestWorstPerformers: Boolean = true,
+    val notificationsEnabled: Boolean = true,
+    val reminderFrequencyDays: Int = 7
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val currencyConversionUseCase: CurrencyConversionUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val mockDataGenerator: MockDataGenerator
+    private val mockDataGenerator: MockDataGenerator,
+    private val notificationScheduler: NotificationScheduler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -97,6 +101,18 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferencesRepository.showBestWorstPerformers.collect { show ->
                 _uiState.update { it.copy(showBestWorstPerformers = show) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.notificationsEnabled.collect { enabled ->
+                _uiState.update { it.copy(notificationsEnabled = enabled) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.reminderFrequencyDays.collect { days ->
+                _uiState.update { it.copy(reminderFrequencyDays = days) }
             }
         }
     }
@@ -194,6 +210,25 @@ class SettingsViewModel @Inject constructor(
     fun setShowBestWorstPerformers(show: Boolean) {
         viewModelScope.launch {
             userPreferencesRepository.setShowBestWorstPerformers(show)
+        }
+    }
+
+    fun setNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setNotificationsEnabled(enabled)
+            notificationScheduler.updateReminderSchedule(
+                _uiState.value.reminderFrequencyDays,
+                enabled
+            )
+        }
+    }
+
+    fun setReminderFrequencyDays(days: Int) {
+        viewModelScope.launch {
+            userPreferencesRepository.setReminderFrequencyDays(days)
+            if (_uiState.value.notificationsEnabled) {
+                notificationScheduler.scheduleReminders(days)
+            }
         }
     }
 }
