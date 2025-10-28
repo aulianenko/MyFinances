@@ -500,21 +500,22 @@ fun SettingsScreen(
                                 )
                             }
 
-                            if (uiState.refreshRatesMessage != null) {
+                            uiState.refreshRatesMessage?.let { message ->
                                 Spacer(modifier = Modifier.height(12.dp))
+                                val isSuccess = message.startsWith("Successfully")
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = if (uiState.refreshRatesMessage.startsWith("Successfully"))
+                                        containerColor = if (isSuccess)
                                             MaterialTheme.colorScheme.primaryContainer
                                         else
                                             MaterialTheme.colorScheme.errorContainer
                                     )
                                 ) {
                                     Text(
-                                        text = uiState.refreshRatesMessage,
+                                        text = message,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = if (uiState.refreshRatesMessage.startsWith("Successfully"))
+                                        color = if (isSuccess)
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         else
                                             MaterialTheme.colorScheme.onErrorContainer,
