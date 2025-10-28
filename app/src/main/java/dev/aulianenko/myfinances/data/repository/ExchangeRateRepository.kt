@@ -1,13 +1,20 @@
 package dev.aulianenko.myfinances.data.repository
 
+import android.util.Log
+import dev.aulianenko.myfinances.data.api.FrankfurterApiService
 import dev.aulianenko.myfinances.data.dao.ExchangeRateDao
 import dev.aulianenko.myfinances.data.entity.ExchangeRate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import java.util.UUID
 
 class ExchangeRateRepository(
-    private val exchangeRateDao: ExchangeRateDao
+    private val exchangeRateDao: ExchangeRateDao,
+    private val apiService: FrankfurterApiService
 ) {
+    companion object {
+        private const val TAG = "ExchangeRateRepository"
+    }
     fun getAllExchangeRates(): Flow<List<ExchangeRate>> = exchangeRateDao.getAllExchangeRates()
 
     fun getExchangeRate(currencyCode: String): Flow<ExchangeRate?> =
@@ -68,6 +75,53 @@ class ExchangeRateRepository(
                 ExchangeRate(currencyCode = "AED", rateToUSD = 0.27)
             )
             insertExchangeRates(defaultRates)
+        }
+    }
+
+    /**
+     * Fetch latest exchange rates from Frankfurter API and update database.
+     * @return Result with number of rates updated, or error message
+     */
+    suspend fun updateExchangeRatesFromApi(): Result<Int> {
+        return try {
+            Log.d(TAG, "Fetching exchange rates from API...")
+
+            // Fetch latest rates from API with USD as base currency
+            val response = apiService.getLatestRates(base = "USD")
+
+            Log.d(TAG, "Received ${response.rates.size} exchange rates from API")
+
+            // Convert API response to database entities
+            val exchangeRates = mutableListOf<ExchangeRate>()
+
+            // Add USD with rate 1.0
+            exchangeRates.add(
+                ExchangeRate(
+                    currencyCode = "USD",
+                    rateToUSD = 1.0,
+                    lastUpdated = System.currentTimeMillis()
+                )
+            )
+
+            // Add all other currencies from API response
+            response.rates.forEach { (currencyCode, rate) ->
+                exchangeRates.add(
+                    ExchangeRate(
+                        currencyCode = currencyCode,
+                        rateToUSD = 1.0 / rate, // API returns USD to currency, we store currency to USD
+                        lastUpdated = System.currentTimeMillis()
+                    )
+                )
+            }
+
+            // Update database with new rates
+            insertExchangeRates(exchangeRates)
+
+            Log.d(TAG, "Successfully updated ${exchangeRates.size} exchange rates")
+            Result.success(exchangeRates.size)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update exchange rates from API", e)
+            Result.failure(e)
         }
     }
 

@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.aulianenko.myfinances.data.api.FrankfurterApiService
 import dev.aulianenko.myfinances.data.dao.AccountDao
 import dev.aulianenko.myfinances.data.dao.AccountValueDao
 import dev.aulianenko.myfinances.data.dao.ExchangeRateDao
@@ -30,9 +31,10 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideExchangeRateRepository(
-        exchangeRateDao: ExchangeRateDao
+        exchangeRateDao: ExchangeRateDao,
+        apiService: FrankfurterApiService
     ): ExchangeRateRepository {
-        return ExchangeRateRepository(exchangeRateDao)
+        return ExchangeRateRepository(exchangeRateDao, apiService)
     }
 
     @Provides
