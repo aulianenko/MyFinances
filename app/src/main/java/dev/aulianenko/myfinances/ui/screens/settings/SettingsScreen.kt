@@ -1,5 +1,9 @@
 package dev.aulianenko.myfinances.ui.screens.settings
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -59,6 +63,14 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    // Permission launcher for POST_NOTIFICATIONS (Android 13+)
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        // Update notification settings based on permission result
+        viewModel.setNotificationsEnabled(isGranted)
+    }
 
     Scaffold(
         topBar = {
@@ -331,6 +343,101 @@ fun SettingsScreen(
                                         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
                                 )
+                            }
+                        }
+                    }
+                }
+
+                // Notifications
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Notifications",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Get reminders to update your portfolio",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Enable/Disable notifications
+                            FilterChip(
+                                selected = uiState.notificationsEnabled,
+                                onClick = {
+                                    val newValue = !uiState.notificationsEnabled
+                                    // For Android 13+, request permission when enabling notifications
+                                    if (newValue && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    } else {
+                                        viewModel.setNotificationsEnabled(newValue)
+                                    }
+                                },
+                                label = {
+                                    Text(
+                                        text = if (uiState.notificationsEnabled) "Enabled" else "Disabled",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            )
+
+                            if (uiState.notificationsEnabled) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Reminder Frequency",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    listOf(3, 7, 14, 30).forEach { days ->
+                                        FilterChip(
+                                            selected = uiState.reminderFrequencyDays == days,
+                                            onClick = { viewModel.setReminderFrequencyDays(days) },
+                                            label = {
+                                                Text(
+                                                    text = when (days) {
+                                                        3 -> "3 days"
+                                                        7 -> "Weekly"
+                                                        14 -> "Bi-weekly"
+                                                        30 -> "Monthly"
+                                                        else -> "$days days"
+                                                    },
+                                                    style = MaterialTheme.typography.labelMedium
+                                                )
+                                            },
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = FilterChipDefaults.filterChipColors(
+                                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
