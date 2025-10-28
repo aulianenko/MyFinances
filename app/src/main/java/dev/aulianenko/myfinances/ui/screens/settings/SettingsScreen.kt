@@ -20,6 +20,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
@@ -143,6 +146,66 @@ fun SettingsScreen(
                                             }
                                         )
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Theme Mode Selector
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Theme",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Choose your preferred theme mode",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                ThemeMode.entries.forEach { mode ->
+                                    val label = when (mode) {
+                                        ThemeMode.LIGHT -> "Light"
+                                        ThemeMode.DARK -> "Dark"
+                                        ThemeMode.SYSTEM -> "System"
+                                    }
+                                    FilterChip(
+                                        selected = uiState.themeMode == mode,
+                                        onClick = { viewModel.setThemeMode(mode) },
+                                        label = {
+                                            Text(
+                                                text = label,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = if (uiState.themeMode == mode) FontWeight.SemiBold else FontWeight.Normal
+                                            )
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    )
                                 }
                             }
                         }

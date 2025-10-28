@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.aulianenko.myfinances.data.entity.ExchangeRate
+import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
 import dev.aulianenko.myfinances.domain.usecase.CurrencyConversionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val baseCurrency: String = "USD",
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val fromCurrency: String = "USD",
     val toCurrency: String = "EUR",
     val amount: String = "100",
@@ -41,6 +43,13 @@ class SettingsViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            // Load theme mode preference
+            userPreferencesRepository.themeMode.collect { themeMode ->
+                _uiState.update { it.copy(themeMode = themeMode) }
+            }
+        }
+
+        viewModelScope.launch {
             // Load exchange rates
             currencyConversionUseCase.getAllExchangeRates().collect { rates ->
                 _uiState.update {
@@ -56,6 +65,12 @@ class SettingsViewModel @Inject constructor(
     fun setBaseCurrency(currencyCode: String) {
         viewModelScope.launch {
             userPreferencesRepository.setBaseCurrency(currencyCode)
+        }
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch {
+            userPreferencesRepository.setThemeMode(mode)
         }
     }
 
