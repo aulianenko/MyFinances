@@ -52,27 +52,36 @@ class DashboardViewModel @Inject constructor(
                 .map { it.selectedPeriod }
                 .distinctUntilChanged()
                 .flatMapLatest { period ->
-                    kotlinx.coroutines.flow.combine(
+                    val dataFlow = kotlinx.coroutines.flow.combine(
                         calculateStatisticsUseCase.getPortfolioStatistics(period),
                         calculateStatisticsUseCase.getPortfolioValueHistory(period),
-                        analyticsUseCase.getPortfolioAnalytics(period),
+                        analyticsUseCase.getPortfolioAnalytics(period)
+                    ) { statistics, history, analytics ->
+                        Triple(statistics, history, analytics)
+                    }
+
+                    val visibilityFlow = kotlinx.coroutines.flow.combine(
                         userPreferencesRepository.showPortfolioValue,
                         userPreferencesRepository.showPortfolioTrend,
                         userPreferencesRepository.showPortfolioDistribution,
                         userPreferencesRepository.showPortfolioGrowth,
                         userPreferencesRepository.showBestWorstPerformers
-                    ) { statistics, history, analytics, showValue, showTrend, showDistribution, showGrowth, showPerformers ->
+                    ) { showValue, showTrend, showDistribution, showGrowth, showPerformers ->
+                        DashboardCardVisibility(
+                            showPortfolioValue = showValue,
+                            showPortfolioTrend = showTrend,
+                            showPortfolioDistribution = showDistribution,
+                            showPortfolioGrowth = showGrowth,
+                            showBestWorstPerformers = showPerformers
+                        )
+                    }
+
+                    kotlinx.coroutines.flow.combine(dataFlow, visibilityFlow) { (statistics, history, analytics), visibility ->
                         DashboardData(
                             statistics = statistics,
                             history = history,
                             analytics = analytics,
-                            visibility = DashboardCardVisibility(
-                                showPortfolioValue = showValue,
-                                showPortfolioTrend = showTrend,
-                                showPortfolioDistribution = showDistribution,
-                                showPortfolioGrowth = showGrowth,
-                                showBestWorstPerformers = showPerformers
-                            )
+                            visibility = visibility
                         )
                     }
                 }
