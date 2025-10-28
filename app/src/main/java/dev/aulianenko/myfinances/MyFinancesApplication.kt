@@ -34,6 +34,7 @@ class MyFinancesApplication : Application() {
         super.onCreate()
         initializeExchangeRates()
         initializeNotifications()
+        scheduleBackgroundTasks()
     }
 
     private fun initializeExchangeRates() {
@@ -57,5 +58,13 @@ class MyFinancesApplication : Application() {
                 notificationScheduler.scheduleReminders(reminderFrequencyDays)
             }
         }
+    }
+
+    /**
+     * Schedule background tasks like periodic exchange rate updates
+     */
+    private fun scheduleBackgroundTasks() {
+        // Schedule daily exchange rate updates
+        notificationScheduler.scheduleExchangeRateUpdates()
     }
 }

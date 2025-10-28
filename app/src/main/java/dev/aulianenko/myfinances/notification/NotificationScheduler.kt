@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Manages scheduling of periodic reminder notifications
+ * Manages scheduling of periodic reminder notifications and exchange rate updates
  */
 @Singleton
 class NotificationScheduler @Inject constructor(
@@ -18,6 +18,7 @@ class NotificationScheduler @Inject constructor(
 ) {
     companion object {
         private const val REMINDER_WORK_NAME = "portfolio_reminder_work"
+        private const val EXCHANGE_RATE_WORK_NAME = "exchange_rate_update_work"
     }
 
     /**
@@ -53,5 +54,29 @@ class NotificationScheduler @Inject constructor(
         } else {
             cancelReminders()
         }
+    }
+
+    /**
+     * Schedule periodic exchange rate updates
+     * Updates run daily to keep rates fresh
+     */
+    fun scheduleExchangeRateUpdates() {
+        val workRequest = PeriodicWorkRequestBuilder<ExchangeRateWorker>(
+            repeatInterval = 1,
+            repeatIntervalTimeUnit = TimeUnit.DAYS
+        ).build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            EXCHANGE_RATE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    /**
+     * Cancel scheduled exchange rate updates
+     */
+    fun cancelExchangeRateUpdates() {
+        WorkManager.getInstance(context).cancelUniqueWork(EXCHANGE_RATE_WORK_NAME)
     }
 }
