@@ -1,7 +1,9 @@
 package dev.aulianenko.myfinances.ui.screens.dashboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,22 +11,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -88,39 +95,44 @@ fun DashboardScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(paddingValues),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Period Selector
+                // Period Selector - Modern chip style
                 item {
-                    ExposedDropdownMenuBox(
-                        expanded = periodExpanded,
-                        onExpandedChange = { periodExpanded = it }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 12.dp)
                     ) {
-                        OutlinedTextField(
-                            value = uiState.selectedPeriod.displayName,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Time Period") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = periodExpanded) },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
+                        Text(
+                            text = "TIME PERIOD",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.SemiBold
                         )
-
-                        ExposedDropdownMenu(
-                            expanded = periodExpanded,
-                            onDismissRequest = { periodExpanded = false }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             TimePeriod.entries.forEach { period ->
-                                DropdownMenuItem(
-                                    text = { Text(period.displayName) },
-                                    onClick = {
-                                        viewModel.onPeriodChange(period)
-                                        periodExpanded = false
-                                    }
+                                FilterChip(
+                                    selected = uiState.selectedPeriod == period,
+                                    onClick = { viewModel.onPeriodChange(period) },
+                                    label = {
+                                        Text(
+                                            text = period.displayName,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = if (uiState.selectedPeriod == period) FontWeight.SemiBold else FontWeight.Normal
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                    )
                                 )
                             }
                         }
@@ -130,10 +142,14 @@ fun DashboardScreen(
                 // Summary Card - Total Portfolio Value
                 item {
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        shape = RoundedCornerShape(24.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Column(
                             modifier = Modifier
@@ -142,10 +158,11 @@ fun DashboardScreen(
                         ) {
                             Text(
                                 text = "Total Portfolio Value",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
+                                fontWeight = FontWeight.Medium
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
                             val totalValue = uiState.portfolioStatistics?.totalValueInBaseCurrency ?: 0.0
                             val baseCurrency = CurrencyProvider.getCurrencyByCode(
                                 uiState.portfolioStatistics?.baseCurrency ?: "USD"
@@ -157,16 +174,16 @@ fun DashboardScreen(
                                 }
                             }
                             Text(
-                                text = "${baseCurrency?.symbol ?: ""} ${numberFormat.format(totalValue)}",
-                                style = MaterialTheme.typography.headlineLarge,
+                                text = "${baseCurrency?.symbol ?: ""}${numberFormat.format(totalValue)}",
+                                style = MaterialTheme.typography.displayMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "${uiState.portfolioStatistics?.totalAccounts ?: 0} accounts • ${baseCurrency?.code ?: "USD"}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.75f)
                             )
                         }
                     }
@@ -176,20 +193,26 @@ fun DashboardScreen(
                 if (uiState.portfolioValueHistory.isNotEmpty()) {
                     item {
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
+                                    .padding(24.dp)
                             ) {
                                 Text(
-                                    text = "Portfolio Value Trend",
+                                    text = "Portfolio Trend",
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.Bold
                                 )
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(24.dp))
                                 LineChart(
                                     data = uiState.portfolioValueHistory,
                                     lineColor = MaterialTheme.colorScheme.primary
@@ -220,14 +243,26 @@ fun DashboardScreen(
 
                     if (portfolioData.isNotEmpty()) {
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp)
+                                    .padding(24.dp)
                             ) {
+                                Text(
+                                    text = "Portfolio Distribution",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
                                 PieChart(
                                     data = portfolioData,
                                     showPercentages = true
@@ -241,7 +276,9 @@ fun DashboardScreen(
                 item {
                     Text(
                         text = "Account Performance",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
@@ -275,69 +312,80 @@ fun AccountStatisticsCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp)
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(24.dp)
         ) {
-            Text(
-                text = statistics.accountName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Column {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = statistics.accountName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Current Value",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "${currency?.symbol ?: ""} ${numberFormat.format(statistics.currentValue)}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
                     )
                 }
 
                 if (statistics.valueChange != null && statistics.percentageChange != null) {
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = "Change",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        val isPositive = statistics.valueChange >= 0
-                        Text(
-                            text = "${if (isPositive) "+" else ""}${numberFormat.format(statistics.valueChange)}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (isPositive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                    val isPositive = statistics.valueChange >= 0
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isPositive)
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)
+                        else
+                            MaterialTheme.colorScheme.error.copy(alpha = 0.12f)
+                    ) {
                         Text(
                             text = "${if (isPositive) "+" else ""}${numberFormat.format(statistics.percentageChange)}%",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (isPositive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (isPositive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
                 }
             }
 
-            if (statistics.valueCount > 0) {
-                Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
                 Text(
-                    text = "${statistics.valueCount} value updates in this period",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "${currency?.symbol ?: ""}${numberFormat.format(statistics.currentValue)}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
+
+                if (statistics.valueCount > 0) {
+                    Text(
+                        text = "${statistics.valueCount} updates",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }
