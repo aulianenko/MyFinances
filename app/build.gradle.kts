@@ -120,6 +120,15 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
 
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.codegen)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
