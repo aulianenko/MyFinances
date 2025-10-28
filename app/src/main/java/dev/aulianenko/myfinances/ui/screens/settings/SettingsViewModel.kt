@@ -32,7 +32,9 @@ data class SettingsUiState(
     val showPortfolioGrowth: Boolean = true,
     val showBestWorstPerformers: Boolean = true,
     val notificationsEnabled: Boolean = true,
-    val reminderFrequencyDays: Int = 7
+    val reminderFrequencyDays: Int = 7,
+    val isRefreshingRates: Boolean = false,
+    val refreshRatesMessage: String? = null
 )
 
 @HiltViewModel
@@ -228,6 +230,49 @@ class SettingsViewModel @Inject constructor(
             userPreferencesRepository.setReminderFrequencyDays(days)
             if (_uiState.value.notificationsEnabled) {
                 notificationScheduler.scheduleReminders(days)
+            }
+        }
+    }
+
+    fun refreshExchangeRates() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRefreshingRates = true, refreshRatesMessage = null) }
+            try {
+                val result = currencyConversionUseCase.updateExchangeRatesFromApi()
+                result.fold(
+                    onSuccess = { count ->
+                        _uiState.update {
+                            it.copy(
+                                isRefreshingRates = false,
+                                refreshRatesMessage = "Successfully updated $count exchange rates"
+                            )
+                        }
+                        // Clear message after 3 seconds
+                        kotlinx.coroutines.delay(3000)
+                        _uiState.update { it.copy(refreshRatesMessage = null) }
+                    },
+                    onFailure = { error ->
+                        _uiState.update {
+                            it.copy(
+                                isRefreshingRates = false,
+                                refreshRatesMessage = "Failed to update rates: ${error.message}"
+                            )
+                        }
+                        // Clear error message after 5 seconds
+                        kotlinx.coroutines.delay(5000)
+                        _uiState.update { it.copy(refreshRatesMessage = null) }
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isRefreshingRates = false,
+                        refreshRatesMessage = "Error: ${e.message}"
+                    )
+                }
+                // Clear error message after 5 seconds
+                kotlinx.coroutines.delay(5000)
+                _uiState.update { it.copy(refreshRatesMessage = null) }
             }
         }
     }

@@ -443,6 +443,105 @@ fun SettingsScreen(
                     }
                 }
 
+                // Exchange Rates
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Exchange Rates",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Update exchange rates from Frankfurter API",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = { viewModel.refreshExchangeRates() },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isRefreshingRates,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                if (uiState.isRefreshingRates) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(
+                                    text = if (uiState.isRefreshingRates)
+                                        "Refreshing Rates..."
+                                    else
+                                        "Refresh Exchange Rates",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+
+                            if (uiState.refreshRatesMessage != null) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (uiState.refreshRatesMessage.startsWith("Successfully"))
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        else
+                                            MaterialTheme.colorScheme.errorContainer
+                                    )
+                                ) {
+                                    Text(
+                                        text = uiState.refreshRatesMessage,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (uiState.refreshRatesMessage.startsWith("Successfully"))
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        else
+                                            MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.padding(12.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Last updated: ${
+                                    if (uiState.exchangeRates.isNotEmpty()) {
+                                        val lastUpdated = uiState.exchangeRates.firstOrNull()?.lastUpdated ?: 0
+                                        if (lastUpdated > 0) {
+                                            java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault())
+                                                .format(java.util.Date(lastUpdated))
+                                        } else "Never"
+                                    } else "Never"
+                                }",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                }
+
                 // Mock Data Generator
                 item {
                     Card(
