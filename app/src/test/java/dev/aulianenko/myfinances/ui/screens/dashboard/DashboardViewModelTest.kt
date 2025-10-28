@@ -2,8 +2,11 @@ package dev.aulianenko.myfinances.ui.screens.dashboard
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
+import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
+import dev.aulianenko.myfinances.domain.model.PortfolioAnalytics
 import dev.aulianenko.myfinances.domain.model.PortfolioStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
+import dev.aulianenko.myfinances.domain.usecase.AnalyticsUseCase
 import dev.aulianenko.myfinances.domain.usecase.CalculateStatisticsUseCase
 import io.mockk.every
 import io.mockk.mockk
@@ -34,6 +37,8 @@ class DashboardViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var calculateStatisticsUseCase: CalculateStatisticsUseCase
+    private lateinit var analyticsUseCase: AnalyticsUseCase
+    private lateinit var userPreferencesRepository: UserPreferencesRepository
     private lateinit var viewModel: DashboardViewModel
 
     private val testPortfolioStatistics = PortfolioStatistics(
@@ -46,10 +51,21 @@ class DashboardViewModelTest {
 
     private val testValueHistory = listOf(100.0, 200.0, 300.0, 400.0, 500.0)
 
+    private val testPortfolioAnalytics = PortfolioAnalytics(
+        accountPerformances = emptyList(),
+        bestPerformer = null,
+        worstPerformer = null,
+        averageGrowthRate = 1.0,
+        totalPortfolioGrowth = 1000.0,
+        period = TimePeriod.THREE_MONTHS
+    )
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         calculateStatisticsUseCase = mockk()
+        analyticsUseCase = mockk()
+        userPreferencesRepository = mockk()
 
         // Default mock behavior
         every {
@@ -59,6 +75,31 @@ class DashboardViewModelTest {
         every {
             calculateStatisticsUseCase.getPortfolioValueHistory(any())
         } returns flowOf(testValueHistory)
+
+        every {
+            analyticsUseCase.getPortfolioAnalytics(any())
+        } returns flowOf(testPortfolioAnalytics)
+
+        // Mock user preferences
+        every {
+            userPreferencesRepository.showPortfolioValue
+        } returns flowOf(true)
+
+        every {
+            userPreferencesRepository.showPortfolioTrend
+        } returns flowOf(true)
+
+        every {
+            userPreferencesRepository.showPortfolioDistribution
+        } returns flowOf(true)
+
+        every {
+            userPreferencesRepository.showPortfolioGrowth
+        } returns flowOf(true)
+
+        every {
+            userPreferencesRepository.showBestWorstPerformers
+        } returns flowOf(true)
     }
 
     @After
@@ -68,7 +109,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `initial state should be loading with default period`() = runTest {
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
 
         viewModel.uiState.test {
             val initialState = awaitItem()
@@ -81,7 +122,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `should load portfolio statistics and history on initialization`() = runTest {
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -99,7 +140,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `onPeriodChange should update selected period and set loading state`() = runTest {
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onPeriodChange(TimePeriod.SIX_MONTHS)
@@ -124,7 +165,7 @@ class DashboardViewModelTest {
             calculateStatisticsUseCase.getPortfolioValueHistory(TimePeriod.SIX_MONTHS)
         } returns flowOf(sixMonthsHistory)
 
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onPeriodChange(TimePeriod.SIX_MONTHS)
@@ -144,7 +185,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `changing period multiple times should update data correctly`() = runTest {
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         val oneYearStats = testPortfolioStatistics.copy(period = TimePeriod.ONE_YEAR)
@@ -192,7 +233,7 @@ class DashboardViewModelTest {
             calculateStatisticsUseCase.getPortfolioValueHistory(any())
         } returns flowOf(emptyList())
 
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.uiState.test {
@@ -207,7 +248,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `should handle all period types correctly`() = runTest {
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         val periods = listOf(
@@ -236,7 +277,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `changing to same period should not duplicate requests`() = runTest {
-        viewModel = DashboardViewModel(calculateStatisticsUseCase)
+        viewModel = DashboardViewModel(calculateStatisticsUseCase, analyticsUseCase, userPreferencesRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Clear previous verifications
