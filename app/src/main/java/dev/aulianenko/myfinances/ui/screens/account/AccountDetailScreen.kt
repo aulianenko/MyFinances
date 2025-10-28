@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -126,17 +128,20 @@ fun AccountDetailScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(paddingValues)
+                        .padding(top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     // Current Value Card
                     item {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Column(
@@ -147,25 +152,27 @@ fun AccountDetailScreen(
                             ) {
                                 Text(
                                     text = "Current Value",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
                                 Text(
                                     text = if (uiState.latestValue != null) {
-                                        "${currency?.symbol ?: ""} ${numberFormat.format(uiState.latestValue!!.value)}"
+                                        "${currency?.symbol ?: ""}${numberFormat.format(uiState.latestValue!!.value)}"
                                     } else {
                                         "No values recorded"
                                     },
-                                    style = MaterialTheme.typography.headlineLarge,
+                                    style = MaterialTheme.typography.displayMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    color = MaterialTheme.colorScheme.onPrimary
                                 )
                                 if (uiState.latestValue != null) {
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = currency?.name ?: uiState.account?.currency ?: "",
+                                        text = currency?.code ?: uiState.account?.currency ?: "",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.75f)
                                     )
                                 }
                             }
@@ -179,20 +186,24 @@ fun AccountDetailScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                )
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp)
+                                        .padding(24.dp)
                                 ) {
                                     Text(
                                         text = "Value Trend",
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
+                                        fontWeight = FontWeight.Bold
                                     )
 
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(16.dp))
 
                                     // Time period filter chips
                                     LazyRow(
@@ -202,12 +213,22 @@ fun AccountDetailScreen(
                                             FilterChip(
                                                 selected = selectedPeriod == period,
                                                 onClick = { selectedPeriod = period },
-                                                label = { Text(period.label) }
+                                                label = {
+                                                    Text(
+                                                        text = period.label,
+                                                        fontWeight = if (selectedPeriod == period) FontWeight.SemiBold else FontWeight.Normal
+                                                    )
+                                                },
+                                                shape = RoundedCornerShape(12.dp),
+                                                colors = FilterChipDefaults.filterChipColors(
+                                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                                )
                                             )
                                         }
                                     }
 
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(24.dp))
 
                                     if (chartData.isNotEmpty()) {
                                         LineChart(
@@ -221,7 +242,7 @@ fun AccountDetailScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(32.dp)
+                                                .padding(vertical = 32.dp)
                                         )
                                     }
                                 }
@@ -242,7 +263,8 @@ fun AccountDetailScreen(
                             Text(
                                 text = "Value History",
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
 
@@ -276,32 +298,37 @@ fun AccountValueItem(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "$currencySymbol ${numberFormat.format(accountValue.value)}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    text = "$currencySymbol${numberFormat.format(accountValue.value)}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = dateFormat.format(Date(accountValue.timestamp)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (!accountValue.note.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = accountValue.note,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                     )
                 }
             }
