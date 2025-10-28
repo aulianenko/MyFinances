@@ -93,10 +93,6 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.Analytics.route) {
-            dev.aulianenko.myfinances.ui.screens.analytics.AnalyticsScreen()
-        }
-
         composable(Screen.Settings.route) {
             dev.aulianenko.myfinances.ui.screens.settings.SettingsScreen()
         }
