@@ -140,17 +140,18 @@ fun DashboardScreen(
                 }
 
                 // Summary Card - Total Portfolio Value
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
+                if (uiState.cardVisibility.showPortfolioValue) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -188,9 +189,10 @@ fun DashboardScreen(
                         }
                     }
                 }
+                }
 
                 // Portfolio Value Trend Chart
-                if (uiState.portfolioValueHistory.isNotEmpty()) {
+                if (uiState.cardVisibility.showPortfolioTrend && uiState.portfolioValueHistory.isNotEmpty()) {
                     item {
                         Card(
                             modifier = Modifier
@@ -223,8 +225,9 @@ fun DashboardScreen(
                 }
 
                 // Portfolio Distribution
-                item {
-                    val portfolioData = remember(uiState.portfolioStatistics) {
+                if (uiState.cardVisibility.showPortfolioDistribution) {
+                    item {
+                        val portfolioData = remember(uiState.portfolioStatistics) {
                         val stats = uiState.portfolioStatistics?.accountStatistics ?: emptyList()
                         val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
                             minimumFractionDigits = 2
@@ -270,6 +273,7 @@ fun DashboardScreen(
                             }
                         }
                     }
+                    }
                 }
 
                 // Account Statistics
@@ -294,7 +298,8 @@ fun DashboardScreen(
                     val analytics = uiState.portfolioAnalytics
 
                     // Portfolio Growth Card
-                    item {
+                    if (uiState.cardVisibility.showPortfolioGrowth) {
+                        item {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -338,10 +343,12 @@ fun DashboardScreen(
                                 )
                             }
                         }
+                        }
                     }
 
                     // Best and Worst Performers
-                    item {
+                    if (uiState.cardVisibility.showBestWorstPerformers) {
+                        item {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -429,6 +436,7 @@ fun DashboardScreen(
                                     }
                                 }
                             }
+                        }
                         }
                     }
                 }
