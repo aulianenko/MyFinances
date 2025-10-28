@@ -14,8 +14,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -208,6 +210,68 @@ fun SettingsScreen(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Mock Data Generator
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Developer Tools",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Generate realistic test data for different financial scenarios",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = { viewModel.generateMockData() },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isGeneratingMockData,
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                if (uiState.isGeneratingMockData) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                                Text(
+                                    text = if (uiState.isGeneratingMockData)
+                                        "Generating Mock Data..."
+                                    else
+                                        "Generate Mock Data",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Creates 6 accounts with 12 months of historical data",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
                         }
                     }
                 }

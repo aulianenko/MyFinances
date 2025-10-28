@@ -3,6 +3,7 @@ package dev.aulianenko.myfinances.ui.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.aulianenko.myfinances.data.MockDataGenerator
 import dev.aulianenko.myfinances.data.entity.ExchangeRate
 import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
@@ -22,13 +23,15 @@ data class SettingsUiState(
     val amount: String = "100",
     val convertedAmount: Double? = null,
     val exchangeRates: List<ExchangeRate> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val isGeneratingMockData: Boolean = false
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val currencyConversionUseCase: CurrencyConversionUseCase,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val mockDataGenerator: MockDataGenerator
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -113,6 +116,17 @@ class SettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(convertedAmount = converted) }
             } else {
                 _uiState.update { it.copy(convertedAmount = null) }
+            }
+        }
+    }
+
+    fun generateMockData() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isGeneratingMockData = true) }
+            try {
+                mockDataGenerator.generateMockData()
+            } finally {
+                _uiState.update { it.copy(isGeneratingMockData = false) }
             }
         }
     }
