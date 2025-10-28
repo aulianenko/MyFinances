@@ -3,6 +3,7 @@ package dev.aulianenko.myfinances.ui.screens.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
 import dev.aulianenko.myfinances.domain.model.PortfolioAnalytics
 import dev.aulianenko.myfinances.domain.model.PortfolioStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
@@ -18,18 +19,28 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class DashboardCardVisibility(
+    val showPortfolioValue: Boolean = true,
+    val showPortfolioTrend: Boolean = true,
+    val showPortfolioDistribution: Boolean = true,
+    val showPortfolioGrowth: Boolean = true,
+    val showBestWorstPerformers: Boolean = true
+)
+
 data class DashboardUiState(
     val portfolioStatistics: PortfolioStatistics? = null,
     val portfolioValueHistory: List<Double> = emptyList(),
     val portfolioAnalytics: PortfolioAnalytics? = null,
     val selectedPeriod: TimePeriod = TimePeriod.THREE_MONTHS,
+    val cardVisibility: DashboardCardVisibility = DashboardCardVisibility(),
     val isLoading: Boolean = true
 )
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val calculateStatisticsUseCase: CalculateStatisticsUseCase,
-    private val analyticsUseCase: AnalyticsUseCase
+    private val analyticsUseCase: AnalyticsUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -44,23 +55,47 @@ class DashboardViewModel @Inject constructor(
                     kotlinx.coroutines.flow.combine(
                         calculateStatisticsUseCase.getPortfolioStatistics(period),
                         calculateStatisticsUseCase.getPortfolioValueHistory(period),
-                        analyticsUseCase.getPortfolioAnalytics(period)
-                    ) { statistics, history, analytics ->
-                        Triple(statistics, history, analytics)
+                        analyticsUseCase.getPortfolioAnalytics(period),
+                        userPreferencesRepository.showPortfolioValue,
+                        userPreferencesRepository.showPortfolioTrend,
+                        userPreferencesRepository.showPortfolioDistribution,
+                        userPreferencesRepository.showPortfolioGrowth,
+                        userPreferencesRepository.showBestWorstPerformers
+                    ) { statistics, history, analytics, showValue, showTrend, showDistribution, showGrowth, showPerformers ->
+                        DashboardData(
+                            statistics = statistics,
+                            history = history,
+                            analytics = analytics,
+                            visibility = DashboardCardVisibility(
+                                showPortfolioValue = showValue,
+                                showPortfolioTrend = showTrend,
+                                showPortfolioDistribution = showDistribution,
+                                showPortfolioGrowth = showGrowth,
+                                showBestWorstPerformers = showPerformers
+                            )
+                        )
                     }
                 }
-                .collect { (statistics, history, analytics) ->
+                .collect { data ->
                     _uiState.update {
                         it.copy(
-                            portfolioStatistics = statistics,
-                            portfolioValueHistory = history,
-                            portfolioAnalytics = analytics,
+                            portfolioStatistics = data.statistics,
+                            portfolioValueHistory = data.history,
+                            portfolioAnalytics = data.analytics,
+                            cardVisibility = data.visibility,
                             isLoading = false
                         )
                     }
                 }
         }
     }
+
+    private data class DashboardData(
+        val statistics: PortfolioStatistics?,
+        val history: List<Double>,
+        val analytics: PortfolioAnalytics?,
+        val visibility: DashboardCardVisibility
+    )
 
     fun onPeriodChange(period: TimePeriod) {
         _uiState.update { it.copy(selectedPeriod = period, isLoading = true) }
