@@ -16,12 +16,14 @@ This document provides detailed information about all implemented features, thei
 4. [Dashboard & Analytics](#4-dashboard--analytics)
 5. [Navigation & UI](#5-navigation--ui)
 6. [Multi-Currency Support](#6-multi-currency-support)
+7. [Exchange Rate API Integration](#7-exchange-rate-api-integration)
+8. [Notifications & Reminders](#8-notifications--reminders)
 
 ### 🚧 Planned Features
 
-7. [Charts & Visualizations](#7-charts--visualizations-planned)
-8. [Biometric Authentication](#8-biometric-authentication-planned)
-9. [Settings & Preferences](#9-settings--preferences-planned)
+9. [Biometric Authentication](#9-biometric-authentication-planned)
+10. [Export/Import](#10-exportimport-planned)
+11. [Cloud Sync](#11-cloud-sync-planned)
 
 ---
 
@@ -423,59 +425,279 @@ object CurrencyProvider {
 
 ---
 
-## 7. Charts & Visualizations (Planned)
+## 7. Exchange Rate API Integration
 
-### Planned Features
+### Description
+Automatic and manual updates of exchange rates from the Frankfurter API (European Central Bank) to ensure accurate multi-currency conversions.
 
-#### 7.1 Line Chart
-- Account value over time
-- Interactive timeline
-- Multiple time ranges
-- Zoom and pan
+### User Stories
+- As a user, I want exchange rates to update automatically so I don't have to manage them
+- As a user, I want to manually refresh rates when needed
+- As a user, I want to see when rates were last updated
+- As a user, I want accurate currency conversions in my portfolio
 
-#### 7.2 Pie Chart
-- Portfolio distribution by account
-- Percentage breakdown
-- Interactive segments
+### Features
 
-#### 7.3 Chart Library
-- Options: Vico, MPAndroidChart
-- Integration story to be implemented
+#### 7.1 Automatic Daily Updates
+**Implementation:** `ExchangeRateWorker` (WorkManager)
+
+**Behavior:**
+- Runs once per day automatically
+- Fetches latest rates from Frankfurter API
+- Updates all 30+ supported currencies
+- Retries on failure
+- Runs in background, no user interaction
+
+**Technical:**
+- WorkManager periodic work request
+- Scheduled on app startup
+- ExistingPeriodicWorkPolicy.KEEP (doesn't duplicate)
+- API endpoint: `https://api.frankfurter.dev/v1/latest?base=USD`
+
+#### 7.2 Manual Refresh
+**Screen:** Settings → Exchange Rates card
+**Action:** "Refresh Exchange Rates" button
+
+**Features:**
+- Loading indicator during refresh
+- Success message with count of rates updated
+- Error message if API call fails
+- Displays last updated timestamp
+- Messages auto-dismiss (3s for success, 5s for errors)
+
+**Technical:**
+- ViewModel: `SettingsViewModel.refreshExchangeRates()`
+- UseCase: `CurrencyConversionUseCase.updateExchangeRatesFromApi()`
+- Repository: `ExchangeRateRepository.updateExchangeRatesFromApi()`
+
+#### 7.3 Exchange Rate Display
+**Location:** Settings screen
+
+**Shows:**
+- Last updated date and time
+- Formatted as: "MMM dd, yyyy HH:mm"
+- Example: "Oct 29, 2025 14:30"
+- Shows "Never" if no rates exist
+
+#### 7.4 API Integration
+**API:** Frankfurter (https://frankfurter.dev)
+**Base URL:** `https://api.frankfurter.dev/v1/`
+**Endpoint:** `/latest?base=USD`
+
+**Features:**
+- No authentication required
+- Free for all usage levels
+- Daily updates from ECB (around 16:00 CET)
+- No rate limits for reasonable use
+- Returns rates for 30+ currencies
+
+**Response Format:**
+```json
+{
+  "base": "USD",
+  "date": "2025-10-29",
+  "rates": {
+    "EUR": 0.85,
+    "GBP": 0.75,
+    "JPY": 149.50,
+    ...
+  }
+}
+```
+
+**Technical Stack:**
+- Retrofit 2.11.0 for API calls
+- OkHttp 4.12.0 for HTTP client
+- Moshi 1.15.1 for JSON parsing
+- NetworkModule (Hilt) for DI
+
+#### 7.5 Rate Storage
+**Database:** Room (ExchangeRate table)
+
+**Fields:**
+- `id` (String) - UUID
+- `currencyCode` (String) - Unique index
+- `rateToUSD` (Double) - Exchange rate
+- `lastUpdated` (Long) - Timestamp
+
+**Conversion:**
+- API returns: USD → Currency rate
+- We store: Currency → USD rate (inverted)
+- Reason: Easier conversion calculations
+
+#### 7.6 Error Handling
+**Network Errors:**
+- No internet connection
+- API timeout (30s)
+- API unavailable
+
+**Fallback:**
+- Uses last cached rates
+- Shows error message to user
+- WorkManager retries failed updates
+
+**User Feedback:**
+- Success: Green card with count
+- Error: Red card with error message
+- Auto-dismiss after timeout
 
 ---
 
-## 8. Biometric Authentication (Planned)
+## 8. Notifications & Reminders
+
+### Description
+Configurable reminder notifications to prompt users to update their portfolio values regularly.
+
+### User Stories
+- As a user, I want reminders to update my portfolio
+- As a user, I want to choose how often I get reminders
+- As a user, I want to enable/disable notifications
+- As a user, I want to know which accounts need updating
+
+### Features
+
+#### 8.1 Notification Settings
+**Screen:** Settings → Notifications card
+
+**Options:**
+- Enable/Disable notifications (toggle)
+- Reminder frequency selection
+- Permission handling (Android 13+)
+
+**Frequencies:**
+- Every 3 days
+- Weekly (7 days)
+- Bi-weekly (14 days)
+- Monthly (30 days)
+
+**Technical:**
+- DataStore preferences
+- Permission: POST_NOTIFICATIONS (Android 13+)
+- Permission launcher in Settings screen
+
+#### 8.2 Reminder Worker
+**Implementation:** `ReminderWorker` (WorkManager + Hilt)
+
+**Behavior:**
+- Checks all accounts for updates
+- Compares last update vs. threshold
+- Counts accounts needing updates
+- Shows notification if any accounts outdated
+
+**Logic:**
+```kotlin
+threshold = now - frequency_days
+for each account:
+  if last_update < threshold:
+    accountsNeedingUpdate++
+```
+
+**Technical:**
+- Periodic WorkManager task
+- Frequency matches user preference
+- Runs in background
+- Comprehensive logging
+
+#### 8.3 Notification Display
+**Title:** "Portfolio Update Reminder"
+**Content:** "N account(s) need updating"
+**Icon:** App icon
+**Channel:** "Reminders" (importance: DEFAULT)
+
+**Features:**
+- Deep link to app (when tapped)
+- Dismissible
+- Sound/vibration based on system settings
+
+**Technical:**
+- NotificationHelper creates notifications
+- NotificationScheduler manages WorkManager
+- Channel created on app startup
+
+#### 8.4 Permission Handling
+**Android 13+ (API 33+):**
+- Requires POST_NOTIFICATIONS permission
+- Shows permission dialog when enabling
+- Falls back to disabled if denied
+
+**Android 12 and below:**
+- No permission required
+- Works automatically
+
+**Implementation:**
+- ActivityResultContracts.RequestPermission
+- Permission state stored in preferences
+
+#### 8.5 Scheduling
+**Initial Schedule:**
+- Set on app startup (if enabled)
+- Restored from saved preferences
+
+**Updates:**
+- When user changes frequency
+- When user enables/disables
+- Cancels old work, creates new
+
+**Technical:**
+```kotlin
+WorkManager.enqueueUniquePeriodicWork(
+    name = "portfolio_reminder_work",
+    policy = ExistingPeriodicWorkPolicy.UPDATE,
+    request = PeriodicWorkRequest(frequency)
+)
+```
+
+---
+
+## 9. Biometric Authentication (Planned)
 
 ### Planned Features
 
-#### 8.1 App Lock
+#### 9.1 App Lock
 - Biometric authentication on launch
 - Fingerprint/Face unlock
 - Fallback to PIN/pattern
 
-#### 8.2 Setup Flow
+#### 9.2 Setup Flow
 - Enable/disable in settings
 - Configure fallback method
 
 ---
 
-## 9. Settings & Preferences (Planned)
+## 10. Export/Import (Planned)
 
 ### Planned Features
 
-#### 9.1 Settings Screen
-- Theme selection
-- Default currency
-- Security settings
-- About section
+#### 10.1 Data Export
+- CSV format for accounts and values
+- JSON format for complete backup
+- Include all historical data
+- Share or save to device
 
-#### 9.2 Theme Toggle
-- Light/Dark/System
-- Persistent preference
+#### 10.2 Data Import
+- Import from CSV/JSON
+- Merge with existing data
+- Validation and error handling
 
-#### 9.3 Currency Preferences
-- Default currency for new accounts
-- Display preferences
+#### 10.3 Scheduled Backups
+- Automatic periodic exports
+- Cloud storage integration (Google Drive, etc.)
+
+---
+
+## 11. Cloud Sync (Planned)
+
+### Planned Features
+
+#### 11.1 Multi-Device Sync
+- Real-time synchronization
+- Conflict resolution
+- Backend service integration
+
+#### 11.2 Account Management
+- Sign in with Google/Email
+- Encrypted cloud storage
+- Selective sync options
 
 ---
 
@@ -609,22 +831,22 @@ fun updateState() {
 ## Future Roadmap
 
 ### High Priority
-1. Charts & visualizations
+1. Biometric authentication
 2. Export/Import (CSV, JSON)
-3. Biometric authentication
+3. Budget tracking
 
 ### Medium Priority
-1. Settings screen
-2. Currency conversion
-3. Tags/categories for accounts
+1. Tags/categories for accounts
+2. Goal setting
+3. Custom date ranges for analytics
 
 ### Low Priority
-1. Multi-device sync
-2. Budget tracking
-3. Goal setting
+1. Multi-device cloud sync
+2. Transaction tracking (income vs expenses)
+3. Tax reporting features
 
 ---
 
-**Last Updated:** October 26, 2025
+**Last Updated:** October 29, 2025
 **App Version:** 1.0
-**Features Implemented:** 6/9
+**Features Implemented:** 8/11

@@ -21,7 +21,10 @@ A modern Android app for tracking personal finances across multiple accounts wit
 - **Multi-Currency** - Support for 30+ world currencies with exchange rates
 - **Currency Conversion** - Portfolio totals in base currency with real-time conversion
 - **Currency Converter** - Utility to convert between any currencies in Settings
-- **Settings Screen** - Base currency preference and currency converter
+- **Live Exchange Rates** - Automatic daily updates from Frankfurter API (free, no auth)
+- **Manual Rate Refresh** - Update exchange rates on demand from Settings
+- **Settings Screen** - Base currency preference, notifications, and dashboard customization
+- **Notifications** - Configurable reminders to update portfolio values
 - **Advanced Analytics** - Performance metrics, volatility, and correlations
 - **Scrollable Screens** - All screens properly scroll for any content size
 - **Dark Mode** - Full Material 3 theming with dark mode support
@@ -45,6 +48,8 @@ _Coming soon..._
 - **Architecture:** MVVM (Model-View-ViewModel)
 - **Dependency Injection:** Hilt (Dagger)
 - **Database:** Room 2.6.1
+- **Networking:** Retrofit 2.11.0, OkHttp 4.12.0, Moshi 1.15.1
+- **Background Tasks:** WorkManager 2.9.1
 - **Charts:** Vico 2.0.0-alpha.28
 - **Preferences:** DataStore 1.1.1
 - **Navigation:** Navigation Compose 2.8.5
@@ -73,9 +78,10 @@ The app follows **Simple MVVM** architecture pattern:
 ┌──────────────────▼──────────────────────────┐
 │            Data Layer                        │
 │  - Repository                                │
-│  - Room Database                             │
-│  - DAOs                                      │
-│  - Entities                                  │
+│  - Room Database        - API Services       │
+│  - DAOs                 - Retrofit           │
+│  - Entities             - OkHttp             │
+│                         - WorkManager        │
 └──────────────────────────────────────────────┘
 ```
 
@@ -92,15 +98,25 @@ The app follows **Simple MVVM** architecture pattern:
 ```
 app/src/main/java/dev/aulianenko/myfinances/
 ├── data/
+│   ├── api/              # API services and models
+│   │   ├── model/        # API response models
+│   │   └── FrankfurterApiService.kt
 │   ├── dao/              # Database Access Objects
 │   ├── database/         # Room database configuration
 │   ├── entity/           # Database entities
 │   └── repository/       # Data repositories
 ├── di/                   # Hilt dependency injection modules
+│   ├── DatabaseModule.kt
+│   ├── NetworkModule.kt
+│   └── RepositoryModule.kt
 ├── domain/
 │   ├── model/            # Domain models
 │   ├── usecase/          # Business use cases
 │   └── Currency.kt       # Currency definitions
+├── notification/         # WorkManager workers and notifications
+│   ├── ExchangeRateWorker.kt
+│   ├── ReminderWorker.kt
+│   └── NotificationScheduler.kt
 └── ui/
     ├── components/       # Reusable UI components (charts, inputs, etc.)
     ├── navigation/       # Navigation setup
@@ -244,6 +260,11 @@ Story X.Y: Brief description
   - Multi-currency support (30+ currencies)
   - Currency conversion with exchange rates
   - Currency converter utility in Settings
+  - **Live exchange rate updates** from Frankfurter API
+  - **Automatic daily rate updates** via WorkManager
+  - **Manual rate refresh** from Settings screen
+  - Configurable reminder notifications
+  - Dashboard customization settings
   - Advanced analytics (performance, volatility, correlations)
   - Base currency preference with DataStore
   - Hilt dependency injection
@@ -259,6 +280,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Built with [Jetpack Compose](https://developer.android.com/jetpack/compose)
 - Charts powered by [Vico](https://github.com/patrykandpatrick/vico)
 - Dependency injection with [Hilt](https://dagger.dev/hilt/)
+- Exchange rates from [Frankfurter API](https://frankfurter.dev) (European Central Bank)
+- Networking with [Retrofit](https://square.github.io/retrofit/) and [OkHttp](https://square.github.io/okhttp/)
+- JSON parsing with [Moshi](https://github.com/square/moshi)
 - Icons from [Material Icons](https://fonts.google.com/icons)
 - Architecture inspired by [Android Architecture Components](https://developer.android.com/topic/architecture)
 
