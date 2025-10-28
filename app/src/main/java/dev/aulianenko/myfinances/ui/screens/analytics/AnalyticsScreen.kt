@@ -57,7 +57,9 @@ fun AnalyticsScreen(
                 description = "Add account values to see performance analytics"
             )
         } else {
-            Column(
+            val analytics = uiState.portfolioAnalytics
+
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -65,45 +67,46 @@ fun AnalyticsScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 // Period Selector - Filter chips style
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "TIME PERIOD",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        TimePeriod.entries.forEach { period ->
-                            FilterChip(
-                                selected = uiState.selectedPeriod == period,
-                                onClick = { viewModel.onPeriodChange(period) },
-                                label = {
-                                    Text(
-                                        text = period.displayName,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = if (uiState.selectedPeriod == period) FontWeight.SemiBold else FontWeight.Normal
+                        Text(
+                            text = "TIME PERIOD",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            TimePeriod.entries.forEach { period ->
+                                FilterChip(
+                                    selected = uiState.selectedPeriod == period,
+                                    onClick = { viewModel.onPeriodChange(period) },
+                                    label = {
+                                        Text(
+                                            text = period.displayName,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = if (uiState.selectedPeriod == period) FontWeight.SemiBold else FontWeight.Normal
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                                     )
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                                 )
-                            )
+                            }
                         }
                     }
                 }
 
-                val analytics = uiState.portfolioAnalytics
-
                 // Portfolio Overview Card
                 if (analytics != null) {
+                    item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
@@ -145,8 +148,10 @@ fun AnalyticsScreen(
                             )
                         }
                     }
+                    }
 
                     // Best and Worst Performers
+                    item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -233,21 +238,19 @@ fun AnalyticsScreen(
                             }
                         }
                     }
+                    }
 
                     // Account Performance List
-                    Text(
-                        text = "Account Performance",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    item {
+                        Text(
+                            text = "Account Performance",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(analytics.accountPerformances.sortedByDescending { it.totalGainPercentage }) { performance ->
-                            AccountPerformanceCard(performance = performance)
-                        }
+                    items(analytics.accountPerformances.sortedByDescending { it.totalGainPercentage }) { performance ->
+                        AccountPerformanceCard(performance = performance)
                     }
                 }
             }
