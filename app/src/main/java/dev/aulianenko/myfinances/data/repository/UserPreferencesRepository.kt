@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +40,8 @@ class UserPreferencesRepository(private val context: Context) {
         val SHOW_PORTFOLIO_DISTRIBUTION = booleanPreferencesKey("show_portfolio_distribution")
         val SHOW_PORTFOLIO_GROWTH = booleanPreferencesKey("show_portfolio_growth")
         val SHOW_BEST_WORST_PERFORMERS = booleanPreferencesKey("show_best_worst_performers")
+        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val REMINDER_FREQUENCY_DAYS = intPreferencesKey("reminder_frequency_days")
     }
 
     companion object {
@@ -72,6 +75,14 @@ class UserPreferencesRepository(private val context: Context) {
 
     val showBestWorstPerformers: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.SHOW_BEST_WORST_PERFORMERS] ?: true
+    }
+
+    val notificationsEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true
+    }
+
+    val reminderFrequencyDays: Flow<Int> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.REMINDER_FREQUENCY_DAYS] ?: 7
     }
 
     suspend fun setBaseCurrency(currencyCode: String) {
@@ -121,6 +132,18 @@ class UserPreferencesRepository(private val context: Context) {
     suspend fun setShowBestWorstPerformers(show: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_BEST_WORST_PERFORMERS] = show
+        }
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setReminderFrequencyDays(days: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.REMINDER_FREQUENCY_DAYS] = days
         }
     }
 }
