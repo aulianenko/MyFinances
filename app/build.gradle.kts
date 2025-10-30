@@ -129,6 +129,9 @@ dependencies {
     implementation(libs.moshi.kotlin)
     ksp(libs.moshi.codegen)
 
+    // Biometric
+    implementation(libs.androidx.biometric)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
