@@ -42,6 +42,8 @@ class UserPreferencesRepository(private val context: Context) {
         val SHOW_BEST_WORST_PERFORMERS = booleanPreferencesKey("show_best_worst_performers")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         val REMINDER_FREQUENCY_DAYS = intPreferencesKey("reminder_frequency_days")
+        val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
+        val APP_LOCK_ENABLED = booleanPreferencesKey("app_lock_enabled")
     }
 
     companion object {
@@ -83,6 +85,14 @@ class UserPreferencesRepository(private val context: Context) {
 
     val reminderFrequencyDays: Flow<Int> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.REMINDER_FREQUENCY_DAYS] ?: 7
+    }
+
+    val biometricEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.BIOMETRIC_ENABLED] ?: false
+    }
+
+    val appLockEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.APP_LOCK_ENABLED] ?: false
     }
 
     suspend fun setBaseCurrency(currencyCode: String) {
@@ -144,6 +154,18 @@ class UserPreferencesRepository(private val context: Context) {
     suspend fun setReminderFrequencyDays(days: Int) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.REMINDER_FREQUENCY_DAYS] = days
+        }
+    }
+
+    suspend fun setBiometricEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.BIOMETRIC_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setAppLockEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_LOCK_ENABLED] = enabled
         }
     }
 }
