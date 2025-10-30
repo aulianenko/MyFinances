@@ -9,6 +9,7 @@ import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
 import dev.aulianenko.myfinances.domain.usecase.CurrencyConversionUseCase
 import dev.aulianenko.myfinances.notification.NotificationScheduler
+import dev.aulianenko.myfinances.security.BiometricAuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +35,10 @@ data class SettingsUiState(
     val notificationsEnabled: Boolean = true,
     val reminderFrequencyDays: Int = 7,
     val isRefreshingRates: Boolean = false,
-    val refreshRatesMessage: String? = null
+    val refreshRatesMessage: String? = null,
+    val biometricEnabled: Boolean = false,
+    val appLockEnabled: Boolean = false,
+    val isBiometricAvailable: Boolean = false
 )
 
 @HiltViewModel
@@ -42,7 +46,8 @@ class SettingsViewModel @Inject constructor(
     private val currencyConversionUseCase: CurrencyConversionUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val mockDataGenerator: MockDataGenerator,
-    private val notificationScheduler: NotificationScheduler
+    private val notificationScheduler: NotificationScheduler,
+    private val biometricAuthManager: BiometricAuthManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -116,6 +121,24 @@ class SettingsViewModel @Inject constructor(
             userPreferencesRepository.reminderFrequencyDays.collect { days ->
                 _uiState.update { it.copy(reminderFrequencyDays = days) }
             }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.biometricEnabled.collect { enabled ->
+                _uiState.update { it.copy(biometricEnabled = enabled) }
+            }
+        }
+
+        viewModelScope.launch {
+            userPreferencesRepository.appLockEnabled.collect { enabled ->
+                _uiState.update { it.copy(appLockEnabled = enabled) }
+            }
+        }
+
+        // Check if biometric authentication is available
+        _uiState.update {
+            it.copy(isBiometricAvailable = biometricAuthManager.isBiometricAuthAvailable()
+                == dev.aulianenko.myfinances.security.BiometricAvailability.AVAILABLE)
         }
     }
 
@@ -273,6 +296,26 @@ class SettingsViewModel @Inject constructor(
                 // Clear error message after 5 seconds
                 kotlinx.coroutines.delay(5000)
                 _uiState.update { it.copy(refreshRatesMessage = null) }
+            }
+        }
+    }
+
+    fun setBiometricEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setBiometricEnabled(enabled)
+            // If biometric is being enabled, also enable app lock
+            if (enabled) {
+                userPreferencesRepository.setAppLockEnabled(true)
+            }
+        }
+    }
+
+    fun setAppLockEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setAppLockEnabled(enabled)
+            // If app lock is being disabled, also disable biometric
+            if (!enabled) {
+                userPreferencesRepository.setBiometricEnabled(false)
             }
         }
     }
