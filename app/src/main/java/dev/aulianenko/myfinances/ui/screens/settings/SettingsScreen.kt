@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -338,6 +339,12 @@ fun SettingsScreen(
 
                 // Export/Import
                 item {
+                    // State for password dialogs
+                    var showExportPasswordDialog by remember { mutableStateOf(false) }
+                    var showImportPasswordDialog by remember { mutableStateOf(false) }
+                    var pendingExportUri: Uri? by remember { mutableStateOf(null) }
+                    var pendingImportUri: Uri? by remember { mutableStateOf(null) }
+
                     // Export file launcher
                     val exportLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -350,6 +357,26 @@ fun SettingsScreen(
                         contract = ActivityResultContracts.OpenDocument()
                     ) { uri ->
                         uri?.let { viewModel.importData(it, replaceExisting = false) }
+                    }
+
+                    // Encrypted export file launcher
+                    val exportEncryptedLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.CreateDocument("application/json")
+                    ) { uri ->
+                        uri?.let {
+                            pendingExportUri = it
+                            showExportPasswordDialog = true
+                        }
+                    }
+
+                    // Encrypted import file launcher
+                    val importEncryptedLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.OpenDocument()
+                    ) { uri ->
+                        uri?.let {
+                            pendingImportUri = it
+                            showImportPasswordDialog = true
+                        }
                     }
 
                     Card(
@@ -419,6 +446,65 @@ fun SettingsScreen(
                                 Text(if (uiState.isImporting) "Importing..." else "Import Data")
                             }
 
+                            Spacer(modifier = Modifier.height(16.dp))
+                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Encrypted backups section
+                            Text(
+                                text = "Encrypted Backups",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Password-protected exports with AES-256 encryption",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Export Encrypted button
+                            Button(
+                                onClick = {
+                                    val fileName = "myfinances_encrypted_${System.currentTimeMillis()}.json"
+                                    exportEncryptedLauncher.launch(fileName)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isExporting && !uiState.isImporting
+                            ) {
+                                if (uiState.isExporting) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                                Text(if (uiState.isExporting) "Exporting..." else "Export Encrypted")
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Import Encrypted button
+                            Button(
+                                onClick = {
+                                    importEncryptedLauncher.launch(arrayOf("application/json"))
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isExporting && !uiState.isImporting
+                            ) {
+                                if (uiState.isImporting) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                                Text(if (uiState.isImporting) "Importing..." else "Import Encrypted")
+                            }
+
                             // Show export/import message
                             uiState.exportImportMessage?.let { message ->
                                 Spacer(modifier = Modifier.height(12.dp))
@@ -443,6 +529,44 @@ fun SettingsScreen(
                                 }
                             }
                         }
+                    }
+
+                    // Password dialog for encrypted export
+                    if (showExportPasswordDialog) {
+                        PasswordDialog(
+                            title = "Encrypt Backup",
+                            message = "Enter a password to encrypt your backup. You'll need this password to restore the data.",
+                            onConfirm = { password ->
+                                showExportPasswordDialog = false
+                                pendingExportUri?.let { uri ->
+                                    viewModel.exportEncrypted(uri, password)
+                                }
+                                pendingExportUri = null
+                            },
+                            onDismiss = {
+                                showExportPasswordDialog = false
+                                pendingExportUri = null
+                            }
+                        )
+                    }
+
+                    // Password dialog for encrypted import
+                    if (showImportPasswordDialog) {
+                        PasswordDialog(
+                            title = "Decrypt Backup",
+                            message = "Enter the password used to encrypt this backup.",
+                            onConfirm = { password ->
+                                showImportPasswordDialog = false
+                                pendingImportUri?.let { uri ->
+                                    viewModel.importEncrypted(uri, password, replaceExisting = false)
+                                }
+                                pendingImportUri = null
+                            },
+                            onDismiss = {
+                                showImportPasswordDialog = false
+                                pendingImportUri = null
+                            }
+                        )
                     }
                 }
 
@@ -998,4 +1122,87 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+@Composable
+private fun PasswordDialog(
+    title: String,
+    message: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    val isExport = title.contains("Encrypt", ignoreCase = true)
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Password field
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = if (isExport) androidx.compose.ui.text.input.ImeAction.Next else androidx.compose.ui.text.input.ImeAction.Done
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                // Confirm password field (only for export)
+                if (isExport) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { confirmPassword = it },
+                        label = { Text("Confirm Password") },
+                        visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = confirmPassword.isNotEmpty() && password != confirmPassword
+                    )
+                    if (confirmPassword.isNotEmpty() && password != confirmPassword) {
+                        Text(
+                            text = "Passwords do not match",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (password.isNotEmpty() && (!isExport || password == confirmPassword)) {
+                        onConfirm(password)
+                    }
+                },
+                enabled = password.isNotEmpty() && (!isExport || (password == confirmPassword && confirmPassword.isNotEmpty()))
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

@@ -426,4 +426,107 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Export all data to an encrypted file with password protection.
+     * @param uri The URI to write the encrypted export file to
+     * @param password The password to use for encryption
+     */
+    fun exportEncrypted(uri: Uri, password: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isExporting = true, exportImportMessage = null) }
+            try {
+                val result = exportImportRepository.exportEncrypted(uri, password)
+                result.fold(
+                    onSuccess = {
+                        _uiState.update {
+                            it.copy(
+                                isExporting = false,
+                                exportImportMessage = "Encrypted backup created successfully"
+                            )
+                        }
+                        // Clear message after 3 seconds
+                        kotlinx.coroutines.delay(3000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    },
+                    onFailure = { error ->
+                        _uiState.update {
+                            it.copy(
+                                isExporting = false,
+                                exportImportMessage = "Encrypted export failed: ${error.message}"
+                            )
+                        }
+                        // Clear error message after 5 seconds
+                        kotlinx.coroutines.delay(5000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isExporting = false,
+                        exportImportMessage = "Export error: ${e.message}"
+                    )
+                }
+                // Clear error message after 5 seconds
+                kotlinx.coroutines.delay(5000)
+                _uiState.update { it.copy(exportImportMessage = null) }
+            }
+        }
+    }
+
+    /**
+     * Import data from an encrypted file with password protection.
+     * @param uri The URI to read the encrypted import file from
+     * @param password The password to use for decryption
+     * @param replaceExisting If true, existing data will be replaced; if false, data will be merged
+     */
+    fun importEncrypted(uri: Uri, password: String, replaceExisting: Boolean = false) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isImporting = true, exportImportMessage = null) }
+            try {
+                val result = exportImportRepository.importEncrypted(uri, password, replaceExisting)
+                result.fold(
+                    onSuccess = { importResult ->
+                        val message = buildString {
+                            append("Encrypted backup restored successfully:\n")
+                            append("${importResult.accountsImported} accounts, ")
+                            append("${importResult.accountValuesImported} values, ")
+                            append("${importResult.exchangeRatesImported} exchange rates")
+                        }
+                        _uiState.update {
+                            it.copy(
+                                isImporting = false,
+                                exportImportMessage = message
+                            )
+                        }
+                        // Clear message after 5 seconds
+                        kotlinx.coroutines.delay(5000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    },
+                    onFailure = { error ->
+                        _uiState.update {
+                            it.copy(
+                                isImporting = false,
+                                exportImportMessage = "Encrypted import failed: ${error.message}"
+                            )
+                        }
+                        // Clear error message after 5 seconds
+                        kotlinx.coroutines.delay(5000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isImporting = false,
+                        exportImportMessage = "Import error: ${e.message}"
+                    )
+                }
+                // Clear error message after 5 seconds
+                kotlinx.coroutines.delay(5000)
+                _uiState.update { it.copy(exportImportMessage = null) }
+            }
+        }
+    }
 }
