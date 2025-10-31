@@ -47,10 +47,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
@@ -83,7 +85,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "Settings",
+                title = stringResource(R.string.settings),
                 scrollBehavior = scrollBehavior
             )
         },
@@ -102,7 +104,7 @@ fun SettingsScreen(
             ) {
                 item {
                     Text(
-                        text = "Preferences",
+                        text = stringResource(R.string.preferences),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -129,13 +131,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Base Currency",
+                                text = stringResource(R.string.base_currency),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Portfolio totals will be displayed in this currency",
+                                text = stringResource(R.string.base_currency_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -149,7 +151,7 @@ fun SettingsScreen(
                                     value = "${uiState.baseCurrency} - ${CurrencyProvider.getCurrencyByCode(uiState.baseCurrency)?.name ?: ""}",
                                     onValueChange = {},
                                     readOnly = true,
-                                    label = { Text("Select Base Currency") },
+                                    label = { Text(stringResource(R.string.select_base_currency)) },
                                     trailingIcon = {
                                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = baseCurrencyExpanded)
                                     },
@@ -197,13 +199,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Theme",
+                                text = stringResource(R.string.theme),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Choose your preferred theme mode",
+                                text = stringResource(R.string.theme_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -215,9 +217,9 @@ fun SettingsScreen(
                             ) {
                                 ThemeMode.entries.forEach { mode ->
                                     val label = when (mode) {
-                                        ThemeMode.LIGHT -> "Light"
-                                        ThemeMode.DARK -> "Dark"
-                                        ThemeMode.SYSTEM -> "System"
+                                        ThemeMode.LIGHT -> stringResource(R.string.theme_light)
+                                        ThemeMode.DARK -> stringResource(R.string.theme_dark)
+                                        ThemeMode.SYSTEM -> stringResource(R.string.theme_system)
                                     }
                                     FilterChip(
                                         selected = uiState.themeMode == mode,
@@ -257,13 +259,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Security",
+                                text = stringResource(R.string.security),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Protect your financial data",
+                                text = stringResource(R.string.security_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -277,12 +279,12 @@ fun SettingsScreen(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "App Lock",
+                                        text = stringResource(R.string.app_lock),
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Medium
                                     )
                                     Text(
-                                        text = "Require authentication to open app",
+                                        text = stringResource(R.string.app_lock_description),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -309,12 +311,12 @@ fun SettingsScreen(
                                 ) {
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
-                                            text = "Biometric Authentication",
+                                            text = stringResource(R.string.biometric_authentication),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
-                                            text = "Use fingerprint or face unlock",
+                                            text = stringResource(R.string.biometric_description),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -337,7 +339,7 @@ fun SettingsScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = "Biometric authentication not available on this device",
+                                        text = stringResource(R.string.biometric_not_available),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(12.dp)
@@ -404,13 +406,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Data Management",
+                                text = stringResource(R.string.data_management),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Export and import your financial data",
+                                text = stringResource(R.string.data_management_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -433,7 +435,7 @@ fun SettingsScreen(
                                     )
                                     Spacer(modifier = Modifier.size(8.dp))
                                 }
-                                Text(if (uiState.isExporting) "Exporting..." else "Export Data")
+                                Text(if (uiState.isExporting) stringResource(R.string.exporting) else stringResource(R.string.export_data))
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -454,7 +456,7 @@ fun SettingsScreen(
                                     )
                                     Spacer(modifier = Modifier.size(8.dp))
                                 }
-                                Text(if (uiState.isImporting) "Importing..." else "Import Data")
+                                Text(if (uiState.isImporting) stringResource(R.string.importing) else stringResource(R.string.import_data))
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -463,13 +465,13 @@ fun SettingsScreen(
 
                             // Encrypted backups section
                             Text(
-                                text = "Encrypted Backups",
+                                text = stringResource(R.string.encrypted_backups),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Password-protected exports with AES-256 encryption",
+                                text = stringResource(R.string.encrypted_backups_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -492,7 +494,7 @@ fun SettingsScreen(
                                     )
                                     Spacer(modifier = Modifier.size(8.dp))
                                 }
-                                Text(if (uiState.isExporting) "Exporting..." else "Export Encrypted")
+                                Text(if (uiState.isExporting) stringResource(R.string.exporting) else stringResource(R.string.export_encrypted))
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -513,7 +515,7 @@ fun SettingsScreen(
                                     )
                                     Spacer(modifier = Modifier.size(8.dp))
                                 }
-                                Text(if (uiState.isImporting) "Importing..." else "Import Encrypted")
+                                Text(if (uiState.isImporting) stringResource(R.string.importing) else stringResource(R.string.import_encrypted))
                             }
 
                             // Show export/import message
@@ -545,8 +547,8 @@ fun SettingsScreen(
                     // Password dialog for encrypted export
                     if (showExportPasswordDialog) {
                         PasswordDialog(
-                            title = "Encrypt Backup",
-                            message = "Enter a password to encrypt your backup. You'll need this password to restore the data.",
+                            title = stringResource(R.string.encrypt_backup),
+                            message = stringResource(R.string.encrypt_backup_message),
                             onConfirm = { password ->
                                 showExportPasswordDialog = false
                                 pendingExportUri?.let { uri ->
@@ -564,8 +566,8 @@ fun SettingsScreen(
                     // Password dialog for encrypted import
                     if (showImportPasswordDialog) {
                         PasswordDialog(
-                            title = "Decrypt Backup",
-                            message = "Enter the password used to encrypt this backup.",
+                            title = stringResource(R.string.decrypt_backup),
+                            message = stringResource(R.string.decrypt_backup_message),
                             onConfirm = { password ->
                                 showImportPasswordDialog = false
                                 pendingImportUri?.let { uri ->
@@ -597,13 +599,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Dashboard Customization",
+                                text = stringResource(R.string.dashboard_customization),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Show or hide cards on your dashboard",
+                                text = stringResource(R.string.dashboard_customization_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -617,7 +619,7 @@ fun SettingsScreen(
                                     onClick = { viewModel.setShowPortfolioValue(!uiState.showPortfolioValue) },
                                     label = {
                                         Text(
-                                            text = "Total Portfolio Value",
+                                            text = stringResource(R.string.card_portfolio_value),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     },
@@ -633,7 +635,7 @@ fun SettingsScreen(
                                     onClick = { viewModel.setShowPortfolioTrend(!uiState.showPortfolioTrend) },
                                     label = {
                                         Text(
-                                            text = "Portfolio Trend Chart",
+                                            text = stringResource(R.string.card_portfolio_trend),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     },
@@ -649,7 +651,7 @@ fun SettingsScreen(
                                     onClick = { viewModel.setShowPortfolioDistribution(!uiState.showPortfolioDistribution) },
                                     label = {
                                         Text(
-                                            text = "Portfolio Distribution",
+                                            text = stringResource(R.string.card_portfolio_distribution),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     },
@@ -665,7 +667,7 @@ fun SettingsScreen(
                                     onClick = { viewModel.setShowPortfolioGrowth(!uiState.showPortfolioGrowth) },
                                     label = {
                                         Text(
-                                            text = "Portfolio Growth",
+                                            text = stringResource(R.string.card_portfolio_growth),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     },
@@ -681,7 +683,7 @@ fun SettingsScreen(
                                     onClick = { viewModel.setShowBestWorstPerformers(!uiState.showBestWorstPerformers) },
                                     label = {
                                         Text(
-                                            text = "Best/Worst Performers",
+                                            text = stringResource(R.string.card_best_worst_performers),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     },
@@ -712,13 +714,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Notifications",
+                                text = stringResource(R.string.notifications),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Get reminders to update your portfolio",
+                                text = stringResource(R.string.notifications_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -738,7 +740,7 @@ fun SettingsScreen(
                                 },
                                 label = {
                                     Text(
-                                        text = if (uiState.notificationsEnabled) "Enabled" else "Disabled",
+                                        text = if (uiState.notificationsEnabled) stringResource(R.string.enabled) else stringResource(R.string.disabled),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 },
@@ -752,7 +754,7 @@ fun SettingsScreen(
                             if (uiState.notificationsEnabled) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "Reminder Frequency",
+                                    text = stringResource(R.string.reminder_frequency),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -769,10 +771,10 @@ fun SettingsScreen(
                                             label = {
                                                 Text(
                                                     text = when (days) {
-                                                        3 -> "3 days"
-                                                        7 -> "Weekly"
-                                                        14 -> "Bi-weekly"
-                                                        30 -> "Monthly"
+                                                        3 -> stringResource(R.string.frequency_3_days)
+                                                        7 -> stringResource(R.string.frequency_weekly)
+                                                        14 -> stringResource(R.string.frequency_biweekly)
+                                                        30 -> stringResource(R.string.frequency_monthly)
                                                         else -> "$days days"
                                                     },
                                                     style = MaterialTheme.typography.labelMedium
@@ -807,13 +809,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Exchange Rates",
+                                text = stringResource(R.string.exchange_rates),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Update exchange rates from Frankfurter API",
+                                text = stringResource(R.string.exchange_rates_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -841,9 +843,9 @@ fun SettingsScreen(
                                 Spacer(modifier = Modifier.size(8.dp))
                                 Text(
                                     text = if (uiState.isRefreshingRates)
-                                        "Refreshing Rates..."
+                                        stringResource(R.string.refreshing_rates)
                                     else
-                                        "Refresh Exchange Rates",
+                                        stringResource(R.string.refresh_exchange_rates),
                                     style = MaterialTheme.typography.labelLarge
                                 )
                             }
@@ -875,15 +877,15 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "Last updated: ${
+                                text = stringResource(R.string.last_updated,
                                     if (uiState.exchangeRates.isNotEmpty()) {
                                         val lastUpdated = uiState.exchangeRates.firstOrNull()?.lastUpdated ?: 0
                                         if (lastUpdated > 0) {
                                             java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault())
                                                 .format(java.util.Date(lastUpdated))
-                                        } else "Never"
-                                    } else "Never"
-                                }",
+                                        } else stringResource(R.string.never)
+                                    } else stringResource(R.string.never)
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
@@ -894,7 +896,7 @@ fun SettingsScreen(
                 // Tools Section
                 item {
                     Text(
-                        text = "Tools",
+                        text = stringResource(R.string.tools),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -915,13 +917,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Currency Converter",
+                                text = stringResource(R.string.currency_converter),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Convert between different currencies using current exchange rates",
+                                text = stringResource(R.string.currency_converter_description),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -933,7 +935,7 @@ fun SettingsScreen(
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("Open Converter")
+                                Text(stringResource(R.string.open_converter))
                             }
                         }
                     }
@@ -955,13 +957,13 @@ fun SettingsScreen(
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = "Developer Tools",
+                                text = stringResource(R.string.developer_tools),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Generate realistic test data for different financial scenarios",
+                                text = stringResource(R.string.developer_tools_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -983,9 +985,9 @@ fun SettingsScreen(
                                 }
                                 Text(
                                     text = if (uiState.isGeneratingMockData)
-                                        "Generating Mock Data..."
+                                        stringResource(R.string.generating_mock_data)
                                     else
-                                        "Generate Mock Data",
+                                        stringResource(R.string.generate_mock_data),
                                     style = MaterialTheme.typography.labelLarge
                                 )
                             }
@@ -993,7 +995,7 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "Creates 6 accounts with 12 months of historical data",
+                                text = stringResource(R.string.mock_data_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
@@ -1031,7 +1033,7 @@ private fun PasswordDialog(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text(stringResource(R.string.password)) },
                     visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -1047,7 +1049,7 @@ private fun PasswordDialog(
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm Password") },
+                        label = { Text(stringResource(R.string.confirm_password)) },
                         visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
@@ -1059,7 +1061,7 @@ private fun PasswordDialog(
                     )
                     if (confirmPassword.isNotEmpty() && password != confirmPassword) {
                         Text(
-                            text = "Passwords do not match",
+                            text = stringResource(R.string.passwords_do_not_match),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 4.dp)
@@ -1077,12 +1079,12 @@ private fun PasswordDialog(
                 },
                 enabled = password.isNotEmpty() && (!isExport || (password == confirmPassword && confirmPassword.isNotEmpty()))
             ) {
-                Text("Confirm")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             androidx.compose.material3.TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

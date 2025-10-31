@@ -33,10 +33,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.InputField
@@ -71,7 +73,7 @@ fun AddAccountValueScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "Update Account Value",
+                title = stringResource(R.string.update_account_value),
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
             )
@@ -90,7 +92,7 @@ fun AddAccountValueScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Account not found",
+                    text = stringResource(R.string.account_not_found),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -109,12 +111,12 @@ fun AddAccountValueScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Account: ${uiState.account?.name}",
+                    text = stringResource(R.string.account_label, uiState.account?.name ?: ""),
                     style = MaterialTheme.typography.titleLarge
                 )
 
                 Text(
-                    text = "Enter the current value of your account in ${currency?.name ?: uiState.account?.currency}",
+                    text = stringResource(R.string.enter_current_value, currency?.name ?: uiState.account?.currency ?: ""),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -122,8 +124,8 @@ fun AddAccountValueScreen(
                 InputField(
                     value = uiState.value,
                     onValueChange = viewModel::onValueChange,
-                    label = "Current Value (${currency?.symbol ?: uiState.account?.currency})",
-                    placeholder = "0.00",
+                    label = stringResource(R.string.current_value_with_symbol, currency?.symbol ?: uiState.account?.currency ?: ""),
+                    placeholder = stringResource(R.string.value_placeholder),
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Next
                 )
@@ -143,7 +145,7 @@ fun AddAccountValueScreen(
                     ) {
                         Column {
                             Text(
-                                text = "Date",
+                                text = stringResource(R.string.date),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -155,7 +157,7 @@ fun AddAccountValueScreen(
                         }
                         Icon(
                             imageVector = Icons.Default.DateRange,
-                            contentDescription = "Select Date",
+                            contentDescription = stringResource(R.string.select_date),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -176,12 +178,12 @@ fun AddAccountValueScreen(
                                     showDatePicker = false
                                 }
                             ) {
-                                Text("OK")
+                                Text(stringResource(R.string.ok))
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { showDatePicker = false }) {
-                                Text("Cancel")
+                                Text(stringResource(R.string.cancel))
                             }
                         }
                     ) {
@@ -192,8 +194,8 @@ fun AddAccountValueScreen(
                 InputField(
                     value = uiState.note,
                     onValueChange = viewModel::onNoteChange,
-                    label = "Note (Optional)",
-                    placeholder = "Add a note about this update",
+                    label = stringResource(R.string.note_optional),
+                    placeholder = stringResource(R.string.add_note_placeholder),
                     imeAction = ImeAction.Done,
                     singleLine = false
                 )
@@ -201,7 +203,7 @@ fun AddAccountValueScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 PrimaryButton(
-                    text = "Save Value",
+                    text = stringResource(R.string.save_value),
                     onClick = viewModel::saveAccountValue,
                     enabled = uiState.value.isNotBlank()
                 )

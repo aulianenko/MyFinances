@@ -43,9 +43,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.domain.model.AccountStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
@@ -80,7 +82,7 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "Dashboard",
+                title = stringResource(R.string.dashboard),
                 scrollBehavior = scrollBehavior
             )
         },
@@ -92,7 +94,7 @@ fun DashboardScreen(
                 }) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Bulk Update Values"
+                        contentDescription = stringResource(R.string.bulk_update_values)
                     )
                 }
             }
@@ -115,8 +117,8 @@ fun DashboardScreen(
             }
         } else if (uiState.portfolioStatistics?.totalAccounts == 0) {
             EmptyState(
-                title = "No Accounts",
-                description = "Create an account to start tracking your finances"
+                title = stringResource(R.string.no_accounts),
+                description = stringResource(R.string.create_account_to_track)
             )
         } else {
             LazyColumn(
@@ -135,7 +137,7 @@ fun DashboardScreen(
                             .padding(top = 12.dp)
                     ) {
                         Text(
-                            text = "TIME PERIOD",
+                            text = stringResource(R.string.time_period),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.SemiBold
@@ -186,7 +188,7 @@ fun DashboardScreen(
                                 .padding(24.dp)
                         ) {
                             Text(
-                                text = "Total Portfolio Value",
+                                text = stringResource(R.string.total_portfolio_value),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
                                 fontWeight = FontWeight.Medium
@@ -210,7 +212,7 @@ fun DashboardScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "${uiState.portfolioStatistics?.totalAccounts ?: 0} accounts • ${baseCurrency?.code ?: "USD"}",
+                                text = stringResource(R.string.accounts_count, uiState.portfolioStatistics?.totalAccounts ?: 0) + " • ${baseCurrency?.code ?: "USD"}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.75f)
                             )
@@ -238,7 +240,7 @@ fun DashboardScreen(
                                     .padding(24.dp)
                             ) {
                                 Text(
-                                    text = "Portfolio Trend",
+                                    text = stringResource(R.string.portfolio_trend),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -289,7 +291,7 @@ fun DashboardScreen(
                                     .padding(24.dp)
                             ) {
                                 Text(
-                                    text = "Portfolio Distribution",
+                                    text = stringResource(R.string.portfolio_distribution),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -307,7 +309,7 @@ fun DashboardScreen(
                 // Account Statistics
                 item {
                     Text(
-                        text = "Account Performance",
+                        text = stringResource(R.string.account_performance),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 16.dp)
@@ -344,7 +346,7 @@ fun DashboardScreen(
                                     .padding(24.dp)
                             ) {
                                 Text(
-                                    text = "Portfolio Growth",
+                                    text = stringResource(R.string.portfolio_growth),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.85f)
@@ -365,7 +367,7 @@ fun DashboardScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Average: ${if (analytics.averageGrowthRate >= 0) "+" else ""}${numberFormat.format(analytics.averageGrowthRate)}%",
+                                    text = stringResource(R.string.average_growth, "${if (analytics.averageGrowthRate >= 0) "+" else ""}${numberFormat.format(analytics.averageGrowthRate)}%"),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.75f)
                                 )
@@ -398,7 +400,7 @@ fun DashboardScreen(
                                             .padding(20.dp)
                                     ) {
                                         Text(
-                                            text = "Best Performer",
+                                            text = stringResource(R.string.best_performer),
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.SemiBold,
                                             color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -439,7 +441,7 @@ fun DashboardScreen(
                                             .padding(20.dp)
                                     ) {
                                         Text(
-                                            text = "Worst Performer",
+                                            text = stringResource(R.string.worst_performer),
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.SemiBold,
                                             color = MaterialTheme.colorScheme.onErrorContainer
@@ -520,7 +522,7 @@ fun AccountStatisticsCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Current Value",
+                        text = stringResource(R.string.current_value),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -561,7 +563,7 @@ fun AccountStatisticsCard(
 
                 if (statistics.valueCount > 0) {
                     Text(
-                        text = "${statistics.valueCount} updates",
+                        text = stringResource(R.string.updates_count, statistics.valueCount),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )

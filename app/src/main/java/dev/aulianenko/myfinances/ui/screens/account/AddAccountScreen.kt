@@ -27,9 +27,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.InputField
@@ -65,7 +67,7 @@ fun AddAccountScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "Add Account",
+                title = stringResource(R.string.add_account),
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
             )
@@ -85,7 +87,7 @@ fun AddAccountScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Create a new account to track your finances",
+                    text = stringResource(R.string.create_account_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -93,8 +95,8 @@ fun AddAccountScreen(
                 InputField(
                     value = uiState.accountName,
                     onValueChange = viewModel::onAccountNameChange,
-                    label = "Account Name",
-                    placeholder = "e.g., Savings Account",
+                    label = stringResource(R.string.account_name),
+                    placeholder = stringResource(R.string.account_name_placeholder),
                     imeAction = ImeAction.Next
                 )
 
@@ -108,7 +110,7 @@ fun AddAccountScreen(
                         } ?: uiState.selectedCurrency,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Currency") },
+                        label = { Text(stringResource(R.string.currency)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyExpanded) },
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                         modifier = Modifier
@@ -135,7 +137,7 @@ fun AddAccountScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 PrimaryButton(
-                    text = "Create Account",
+                    text = stringResource(R.string.create_account),
                     onClick = viewModel::saveAccount,
                     enabled = uiState.accountName.isNotBlank()
                 )

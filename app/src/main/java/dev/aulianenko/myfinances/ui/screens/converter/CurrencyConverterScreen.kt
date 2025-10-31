@@ -34,10 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.screens.settings.SettingsViewModel
 import dev.aulianenko.myfinances.ui.theme.CardShapes
@@ -57,12 +59,12 @@ fun CurrencyConverterScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Currency Converter") },
+                title = { Text(stringResource(R.string.currency_converter)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -101,7 +103,7 @@ fun CurrencyConverterScreen(
                     OutlinedTextField(
                         value = uiState.amount,
                         onValueChange = { viewModel.setAmount(it) },
-                        label = { Text("Amount") },
+                        label = { Text(stringResource(R.string.amount)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -117,7 +119,7 @@ fun CurrencyConverterScreen(
                             value = "${uiState.fromCurrency} - ${CurrencyProvider.getCurrencyByCode(uiState.fromCurrency)?.name ?: ""}",
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("From") },
+                            label = { Text(stringResource(R.string.from)) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = fromCurrencyExpanded)
                             },
@@ -156,7 +158,7 @@ fun CurrencyConverterScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Swap currencies",
+                                contentDescription = stringResource(R.string.swap_currencies),
                                 modifier = Modifier.size(32.dp)
                             )
                         }
@@ -171,7 +173,7 @@ fun CurrencyConverterScreen(
                             value = "${uiState.toCurrency} - ${CurrencyProvider.getCurrencyByCode(uiState.toCurrency)?.name ?: ""}",
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("To") },
+                            label = { Text(stringResource(R.string.to)) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = toCurrencyExpanded)
                             },
@@ -219,7 +221,7 @@ fun CurrencyConverterScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Converted Amount",
+                            text = stringResource(R.string.converted_amount),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )

@@ -35,10 +35,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.EmptyState
@@ -73,7 +75,7 @@ fun BulkUpdateScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = "Bulk Update Values",
+                title = stringResource(R.string.bulk_update_values),
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
             )
@@ -85,8 +87,8 @@ fun BulkUpdateScreen(
             LoadingIndicator()
         } else if (uiState.accountInputs.isEmpty()) {
             EmptyState(
-                title = "No Accounts",
-                description = "Create accounts first to update their values"
+                title = stringResource(R.string.no_accounts),
+                description = stringResource(R.string.create_accounts_first)
             )
         } else {
             Column(
@@ -96,7 +98,7 @@ fun BulkUpdateScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Update values for multiple accounts at once. Leave empty to skip.",
+                    text = stringResource(R.string.bulk_update_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -136,7 +138,7 @@ fun BulkUpdateScreen(
                             ) {
                                 Column {
                                     Text(
-                                        text = "Date",
+                                        text = stringResource(R.string.date),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -148,7 +150,7 @@ fun BulkUpdateScreen(
                                 }
                                 Icon(
                                     imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Select Date",
+                                    contentDescription = stringResource(R.string.select_date),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -169,12 +171,12 @@ fun BulkUpdateScreen(
                                             showDatePicker = false
                                         }
                                     ) {
-                                        Text("OK")
+                                        Text(stringResource(R.string.ok))
                                     }
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { showDatePicker = false }) {
-                                        Text("Cancel")
+                                        Text(stringResource(R.string.cancel))
                                     }
                                 }
                             ) {
@@ -188,8 +190,8 @@ fun BulkUpdateScreen(
                         InputField(
                             value = uiState.note,
                             onValueChange = viewModel::onNoteChange,
-                            label = "Note (Optional)",
-                            placeholder = "Add a note for all updates",
+                            label = stringResource(R.string.note_optional),
+                            placeholder = stringResource(R.string.add_note_all_updates),
                             imeAction = ImeAction.Done,
                             singleLine = false
                         )
@@ -198,7 +200,7 @@ fun BulkUpdateScreen(
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         PrimaryButton(
-                            text = "Save All Values",
+                            text = stringResource(R.string.save_all_values),
                             onClick = viewModel::saveAllValues,
                             enabled = !uiState.isLoading && uiState.accountInputs.any { it.hasValue }
                         )
@@ -248,8 +250,8 @@ fun AccountValueInputCard(
             InputField(
                 value = accountInput.value,
                 onValueChange = onValueChange,
-                label = "Current Value (${currency?.symbol ?: accountInput.account.currency})",
-                placeholder = "0.00",
+                label = stringResource(R.string.current_value_with_symbol, currency?.symbol ?: accountInput.account.currency),
+                placeholder = stringResource(R.string.value_placeholder),
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Next,
                 isError = errorMessage != null,

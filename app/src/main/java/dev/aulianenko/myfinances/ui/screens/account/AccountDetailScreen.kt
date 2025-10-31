@@ -34,9 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
@@ -63,7 +65,7 @@ fun AccountDetailScreen(
     Scaffold(
         topBar = {
             AppTopBar(
-                title = uiState.account?.name ?: "Account Details",
+                title = uiState.account?.name ?: stringResource(R.string.account_details),
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
             )
@@ -72,7 +74,7 @@ fun AccountDetailScreen(
             FloatingActionButton(onClick = { onNavigateToAddValue(accountId) }) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Value"
+                    contentDescription = stringResource(R.string.add_value)
                 )
             }
         },
@@ -92,7 +94,7 @@ fun AccountDetailScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Account not found",
+                        text = stringResource(R.string.account_not_found),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -153,7 +155,7 @@ fun AccountDetailScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Current Value",
+                                    text = stringResource(R.string.current_value),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
@@ -163,7 +165,7 @@ fun AccountDetailScreen(
                                     text = if (uiState.latestValue != null) {
                                         "${currency?.symbol ?: ""}${numberFormat.format(uiState.latestValue!!.value)}"
                                     } else {
-                                        "No values recorded"
+                                        stringResource(R.string.no_values_recorded)
                                     },
                                     style = MaterialTheme.typography.displayMedium,
                                     fontWeight = FontWeight.Bold,
@@ -200,7 +202,7 @@ fun AccountDetailScreen(
                                         .padding(24.dp)
                                 ) {
                                     Text(
-                                        text = "Value Trend",
+                                        text = stringResource(R.string.value_trend),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -217,7 +219,7 @@ fun AccountDetailScreen(
                                                 onClick = { selectedPeriod = period },
                                                 label = {
                                                     Text(
-                                                        text = period.label,
+                                                        text = period.getLabel(),
                                                         fontWeight = if (selectedPeriod == period) FontWeight.SemiBold else FontWeight.Normal
                                                     )
                                                 },
@@ -239,7 +241,7 @@ fun AccountDetailScreen(
                                         )
                                     } else {
                                         Text(
-                                            text = "No data for selected period",
+                                            text = stringResource(R.string.no_data_for_period),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier
@@ -256,14 +258,14 @@ fun AccountDetailScreen(
                     if (uiState.accountValues.isEmpty()) {
                         item {
                             EmptyState(
-                                title = "No Value History",
-                                description = "Add your first value update to start tracking"
+                                title = stringResource(R.string.no_value_history),
+                                description = stringResource(R.string.add_first_value)
                             )
                         }
                     } else {
                         item {
                             Text(
-                                text = "Value History",
+                                text = stringResource(R.string.value_history),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -338,7 +340,7 @@ fun AccountValueItem(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Value",
+                    contentDescription = stringResource(R.string.delete_value),
                     tint = MaterialTheme.colorScheme.error
                 )
             }
@@ -346,9 +348,17 @@ fun AccountValueItem(
     }
 }
 
-enum class TimePeriod(val label: String) {
-    SEVEN_DAYS("7 Days"),
-    THIRTY_DAYS("30 Days"),
-    NINETY_DAYS("90 Days"),
-    ALL("All")
+enum class TimePeriod {
+    SEVEN_DAYS,
+    THIRTY_DAYS,
+    NINETY_DAYS,
+    ALL;
+
+    @Composable
+    fun getLabel(): String = when (this) {
+        SEVEN_DAYS -> stringResource(R.string.time_period_7_days)
+        THIRTY_DAYS -> stringResource(R.string.time_period_30_days)
+        NINETY_DAYS -> stringResource(R.string.time_period_90_days)
+        ALL -> stringResource(R.string.time_period_all)
+    }
 }

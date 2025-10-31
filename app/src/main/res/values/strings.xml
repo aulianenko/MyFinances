@@ -1,3 +1,167 @@
 <resources>
     <string name="app_name">My Finances</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="back">Back</string>
+    <string name="currency">Currency</string>
+    <string name="date">Date</string>
+    <string name="never">Never</string>
+
+    <!-- Account Screens -->
+    <string name="accounts">Accounts</string>
+    <string name="add_account">Add Account</string>
+    <string name="edit_account">Edit Account</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="account_details">Account Details</string>
+    <string name="account_name">Account Name</string>
+    <string name="account_name_placeholder">e.g., Savings Account</string>
+    <string name="create_account">Create Account</string>
+    <string name="update_account">Update Account</string>
+    <string name="account_not_found">Account not found</string>
+    <string name="create_account_description">Create a new account to track your finances</string>
+    <string name="update_account_description">Update your account information</string>
+    <string name="no_accounts_yet">No Accounts Yet</string>
+    <string name="create_first_account">Create your first account to start tracking your finances</string>
+    <string name="no_value_recorded">No value recorded</string>
+
+    <!-- Account Value Screens -->
+    <string name="add_value">Add Value</string>
+    <string name="update_account_value">Update Account Value</string>
+    <string name="current_value">Current Value</string>
+    <string name="current_value_with_symbol">Current Value (%s)</string>
+    <string name="account_label">Account: %s</string>
+    <string name="enter_current_value">Enter the current value of your account in %s</string>
+    <string name="value_placeholder">0.00</string>
+    <string name="note_optional">Note (Optional)</string>
+    <string name="add_note_placeholder">Add a note about this update</string>
+    <string name="save_value">Save Value</string>
+    <string name="delete_value">Delete Value</string>
+    <string name="select_date">Select Date</string>
+    <string name="no_values_recorded">No values recorded</string>
+
+    <!-- Account Detail -->
+    <string name="value_trend">Value Trend</string>
+    <string name="value_history">Value History</string>
+    <string name="no_value_history">No Value History</string>
+    <string name="add_first_value">Add your first value update to start tracking</string>
+    <string name="no_data_for_period">No data for selected period</string>
+    <string name="time_period_7_days">7 Days</string>
+    <string name="time_period_30_days">30 Days</string>
+    <string name="time_period_90_days">90 Days</string>
+    <string name="time_period_all">All</string>
+
+    <!-- Bulk Update -->
+    <string name="bulk_update_values">Bulk Update Values</string>
+    <string name="no_accounts">No Accounts</string>
+    <string name="create_accounts_first">Create accounts first to update their values</string>
+    <string name="bulk_update_description">Update values for multiple accounts at once. Leave empty to skip.</string>
+    <string name="add_note_all_updates">Add a note for all updates</string>
+    <string name="save_all_values">Save All Values</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard">Dashboard</string>
+    <string name="time_period">TIME PERIOD</string>
+    <string name="total_portfolio_value">Total Portfolio Value</string>
+    <string name="portfolio_trend">Portfolio Trend</string>
+    <string name="portfolio_distribution">Portfolio Distribution</string>
+    <string name="portfolio_growth">Portfolio Growth</string>
+    <string name="account_performance">Account Performance</string>
+    <string name="best_performer">Best Performer</string>
+    <string name="worst_performer">Worst Performer</string>
+    <string name="average_growth">Average: %s</string>
+    <string name="accounts_count">%d accounts</string>
+    <string name="updates_count">%d updates</string>
+    <string name="create_account_to_track">Create an account to start tracking your finances</string>
+
+    <!-- Currency Converter -->
+    <string name="currency_converter">Currency Converter</string>
+    <string name="amount">Amount</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="swap_currencies">Swap currencies</string>
+    <string name="converted_amount">Converted Amount</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="preferences">Preferences</string>
+    <string name="base_currency">Base Currency</string>
+    <string name="base_currency_description">Portfolio totals will be displayed in this currency</string>
+    <string name="select_base_currency">Select Base Currency</string>
+
+    <!-- Theme -->
+    <string name="theme">Theme</string>
+    <string name="theme_description">Choose your preferred theme mode</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+
+    <!-- Security -->
+    <string name="security">Security</string>
+    <string name="security_description">Protect your financial data</string>
+    <string name="app_lock">App Lock</string>
+    <string name="app_lock_description">Require authentication to open app</string>
+    <string name="biometric_authentication">Biometric Authentication</string>
+    <string name="biometric_description">Use fingerprint or face unlock</string>
+    <string name="biometric_not_available">Biometric authentication not available on this device</string>
+
+    <!-- Data Management -->
+    <string name="data_management">Data Management</string>
+    <string name="data_management_description">Export and import your financial data</string>
+    <string name="export_data">Export Data</string>
+    <string name="exporting">Exporting…</string>
+    <string name="import_data">Import Data</string>
+    <string name="importing">Importing…</string>
+    <string name="encrypted_backups">Encrypted Backups</string>
+    <string name="encrypted_backups_description">Password-protected exports with AES-256 encryption</string>
+    <string name="export_encrypted">Export Encrypted</string>
+    <string name="import_encrypted">Import Encrypted</string>
+    <string name="encrypt_backup">Encrypt Backup</string>
+    <string name="encrypt_backup_message">Enter a password to encrypt your backup. You\'ll need this password to restore the data.</string>
+    <string name="decrypt_backup">Decrypt Backup</string>
+    <string name="decrypt_backup_message">Enter the password used to encrypt this backup.</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+
+    <!-- Dashboard Customization -->
+    <string name="dashboard_customization">Dashboard Customization</string>
+    <string name="dashboard_customization_description">Show or hide cards on your dashboard</string>
+    <string name="card_portfolio_value">Total Portfolio Value</string>
+    <string name="card_portfolio_trend">Portfolio Trend Chart</string>
+    <string name="card_portfolio_distribution">Portfolio Distribution</string>
+    <string name="card_portfolio_growth">Portfolio Growth</string>
+    <string name="card_best_worst_performers">Best/Worst Performers</string>
+
+    <!-- Notifications -->
+    <string name="notifications">Notifications</string>
+    <string name="notifications_description">Get reminders to update your portfolio</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="reminder_frequency">Reminder Frequency</string>
+    <string name="frequency_3_days">3 days</string>
+    <string name="frequency_weekly">Weekly</string>
+    <string name="frequency_biweekly">Bi-weekly</string>
+    <string name="frequency_monthly">Monthly</string>
+
+    <!-- Exchange Rates -->
+    <string name="exchange_rates">Exchange Rates</string>
+    <string name="exchange_rates_description">Update exchange rates from Frankfurter API</string>
+    <string name="refresh_exchange_rates">Refresh Exchange Rates</string>
+    <string name="refreshing_rates">Refreshing Rates…</string>
+    <string name="last_updated">Last updated: %s</string>
+
+    <!-- Tools -->
+    <string name="tools">Tools</string>
+    <string name="currency_converter_description">Convert between different currencies using current exchange rates</string>
+    <string name="open_converter">Open Converter</string>
+
+    <!-- Developer Tools -->
+    <string name="developer_tools">Developer Tools</string>
+    <string name="developer_tools_description">Generate realistic test data for different financial scenarios</string>
+    <string name="generate_mock_data">Generate Mock Data</string>
+    <string name="generating_mock_data">Generating Mock Data…</string>
+    <string name="mock_data_description">Creates 6 accounts with 12 months of historical data</string>
 </resources>

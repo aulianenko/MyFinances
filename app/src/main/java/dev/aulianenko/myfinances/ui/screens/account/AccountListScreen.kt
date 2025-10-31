@@ -31,9 +31,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.aulianenko.myfinances.R
 import dev.aulianenko.myfinances.data.entity.Account
 import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.domain.CurrencyProvider
@@ -58,13 +60,13 @@ fun AccountListScreen(
 
     Scaffold(
         topBar = {
-            AppTopBar(title = "Accounts")
+            AppTopBar(title = stringResource(R.string.accounts))
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNavigateToAddAccount) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Account"
+                    contentDescription = stringResource(R.string.add_account)
                 )
             }
         },
@@ -77,8 +79,8 @@ fun AccountListScreen(
 
             uiState.accountsWithValues.isEmpty() -> {
                 EmptyState(
-                    title = "No Accounts Yet",
-                    description = "Create your first account to start tracking your finances"
+                    title = stringResource(R.string.no_accounts_yet),
+                    description = stringResource(R.string.create_first_account)
                 )
             }
 
@@ -159,7 +161,7 @@ fun AccountListItem(
                     )
                 } else {
                     Text(
-                        text = "No value recorded",
+                        text = stringResource(R.string.no_value_recorded),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -176,14 +178,14 @@ fun AccountListItem(
                 IconButton(onClick = onEdit) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Account",
+                        contentDescription = stringResource(R.string.edit_account),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete Account",
+                        contentDescription = stringResource(R.string.delete_account),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
