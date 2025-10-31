@@ -50,11 +50,13 @@ import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.domain.model.AccountStatistics
 import dev.aulianenko.myfinances.domain.model.TimePeriod
 import dev.aulianenko.myfinances.ui.components.AppTopBar
+import dev.aulianenko.myfinances.ui.components.DashboardCardSkeleton
 import dev.aulianenko.myfinances.ui.components.EmptyState
 import dev.aulianenko.myfinances.ui.components.LineChart
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
 import dev.aulianenko.myfinances.ui.components.PieChart
 import dev.aulianenko.myfinances.ui.components.PieChartData
+import dev.aulianenko.myfinances.ui.utils.rememberHapticFeedback
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -67,6 +69,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val haptic = rememberHapticFeedback()
 
     var periodExpanded by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -80,7 +83,10 @@ fun DashboardScreen(
         },
         floatingActionButton = {
             if (uiState.portfolioStatistics?.totalAccounts != 0) {
-                FloatingActionButton(onClick = onNavigateToBulkUpdate) {
+                FloatingActionButton(onClick = {
+                    haptic.click()
+                    onNavigateToBulkUpdate()
+                }) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Bulk Update Values"
@@ -91,7 +97,19 @@ fun DashboardScreen(
         modifier = modifier
     ) { paddingValues ->
         if (uiState.isLoading) {
-            LoadingIndicator()
+            // Show skeleton loading
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                items(4) {
+                    DashboardCardSkeleton()
+                }
+            }
         } else if (uiState.portfolioStatistics?.totalAccounts == 0) {
             EmptyState(
                 title = "No Accounts",

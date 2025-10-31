@@ -55,6 +55,7 @@ import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
+import dev.aulianenko.myfinances.ui.utils.rememberHapticFeedback
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -65,6 +66,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val haptic = rememberHapticFeedback()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Permission launcher for POST_NOTIFICATIONS (Android 13+)
@@ -284,7 +286,10 @@ fun SettingsScreen(
                                 }
                                 Switch(
                                     checked = uiState.appLockEnabled,
-                                    onCheckedChange = { viewModel.setAppLockEnabled(it) }
+                                    onCheckedChange = {
+                                        haptic.light()
+                                        viewModel.setAppLockEnabled(it)
+                                    }
                                 )
                             }
 
@@ -313,7 +318,10 @@ fun SettingsScreen(
                                     }
                                     Switch(
                                         checked = uiState.biometricEnabled,
-                                        onCheckedChange = { viewModel.setBiometricEnabled(it) },
+                                        onCheckedChange = {
+                                            haptic.light()
+                                            viewModel.setBiometricEnabled(it)
+                                        },
                                         enabled = uiState.appLockEnabled
                                     )
                                 }
