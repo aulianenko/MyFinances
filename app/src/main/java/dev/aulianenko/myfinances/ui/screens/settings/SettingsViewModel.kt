@@ -1,10 +1,12 @@
 package dev.aulianenko.myfinances.ui.screens.settings
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.aulianenko.myfinances.data.MockDataGenerator
 import dev.aulianenko.myfinances.data.entity.ExchangeRate
+import dev.aulianenko.myfinances.data.export.ExportImportRepository
 import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
 import dev.aulianenko.myfinances.domain.usecase.CurrencyConversionUseCase
@@ -38,7 +40,10 @@ data class SettingsUiState(
     val refreshRatesMessage: String? = null,
     val biometricEnabled: Boolean = false,
     val appLockEnabled: Boolean = false,
-    val isBiometricAvailable: Boolean = false
+    val isBiometricAvailable: Boolean = false,
+    val isExporting: Boolean = false,
+    val isImporting: Boolean = false,
+    val exportImportMessage: String? = null
 )
 
 @HiltViewModel
@@ -47,7 +52,8 @@ class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val mockDataGenerator: MockDataGenerator,
     private val notificationScheduler: NotificationScheduler,
-    private val biometricAuthManager: BiometricAuthManager
+    private val biometricAuthManager: BiometricAuthManager,
+    private val exportImportRepository: ExportImportRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -316,6 +322,107 @@ class SettingsViewModel @Inject constructor(
             // If app lock is being disabled, also disable biometric
             if (!enabled) {
                 userPreferencesRepository.setBiometricEnabled(false)
+            }
+        }
+    }
+
+    /**
+     * Export all data to a file.
+     * @param uri The URI to write the export file to
+     */
+    fun exportData(uri: Uri) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isExporting = true, exportImportMessage = null) }
+            try {
+                val result = exportImportRepository.exportToFile(uri)
+                result.fold(
+                    onSuccess = {
+                        _uiState.update {
+                            it.copy(
+                                isExporting = false,
+                                exportImportMessage = "Data exported successfully"
+                            )
+                        }
+                        // Clear message after 3 seconds
+                        kotlinx.coroutines.delay(3000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    },
+                    onFailure = { error ->
+                        _uiState.update {
+                            it.copy(
+                                isExporting = false,
+                                exportImportMessage = "Export failed: ${error.message}"
+                            )
+                        }
+                        // Clear error message after 5 seconds
+                        kotlinx.coroutines.delay(5000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isExporting = false,
+                        exportImportMessage = "Export error: ${e.message}"
+                    )
+                }
+                // Clear error message after 5 seconds
+                kotlinx.coroutines.delay(5000)
+                _uiState.update { it.copy(exportImportMessage = null) }
+            }
+        }
+    }
+
+    /**
+     * Import data from a file.
+     * @param uri The URI to read the import file from
+     * @param replaceExisting If true, existing data will be replaced; if false, data will be merged
+     */
+    fun importData(uri: Uri, replaceExisting: Boolean = false) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isImporting = true, exportImportMessage = null) }
+            try {
+                val result = exportImportRepository.importFromFile(uri, replaceExisting)
+                result.fold(
+                    onSuccess = { importResult ->
+                        val message = buildString {
+                            append("Data imported successfully:\n")
+                            append("${importResult.accountsImported} accounts, ")
+                            append("${importResult.accountValuesImported} values, ")
+                            append("${importResult.exchangeRatesImported} exchange rates")
+                        }
+                        _uiState.update {
+                            it.copy(
+                                isImporting = false,
+                                exportImportMessage = message
+                            )
+                        }
+                        // Clear message after 5 seconds
+                        kotlinx.coroutines.delay(5000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    },
+                    onFailure = { error ->
+                        _uiState.update {
+                            it.copy(
+                                isImporting = false,
+                                exportImportMessage = "Import failed: ${error.message}"
+                            )
+                        }
+                        // Clear error message after 5 seconds
+                        kotlinx.coroutines.delay(5000)
+                        _uiState.update { it.copy(exportImportMessage = null) }
+                    }
+                )
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isImporting = false,
+                        exportImportMessage = "Import error: ${e.message}"
+                    )
+                }
+                // Clear error message after 5 seconds
+                kotlinx.coroutines.delay(5000)
+                _uiState.update { it.copy(exportImportMessage = null) }
             }
         }
     }
