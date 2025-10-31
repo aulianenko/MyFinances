@@ -11,6 +11,8 @@ import dev.aulianenko.myfinances.data.dao.ExchangeRateDao
 import dev.aulianenko.myfinances.data.entity.Account
 import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.data.entity.ExchangeRate
+import dev.aulianenko.myfinances.security.EncryptedData
+import dev.aulianenko.myfinances.security.EncryptionUtil
 import kotlinx.coroutines.flow.first
 import java.io.IOException
 import javax.inject.Inject
@@ -33,6 +35,7 @@ class ExportImportRepository @Inject constructor(
         .build()
 
     private val exportDataAdapter = moshi.adapter(ExportData::class.java).indent("  ")
+    private val encryptedDataAdapter = moshi.adapter(EncryptedData::class.java).indent("  ")
 
     /**
      * Get the app version name from PackageManager.
@@ -159,6 +162,70 @@ class ExportImportRepository @Inject constructor(
                 inputStream.bufferedReader().readText()
             } ?: throw IOException("Failed to open input stream")
 
+            importFromJson(json, replaceExisting)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Export data to an encrypted file with password protection.
+     * @param uri The URI to write the encrypted file to
+     * @param password The password to use for encryption
+     * @return Result indicating success or failure
+     */
+    suspend fun exportEncrypted(uri: Uri, password: String): Result<Unit> {
+        return try {
+            // Get unencrypted JSON
+            val json = exportToJson()
+
+            // Encrypt the JSON
+            val encryptedData = EncryptionUtil.encrypt(json, password)
+
+            // Convert encrypted data to JSON
+            val encryptedJson = encryptedDataAdapter.toJson(encryptedData)
+
+            // Write to file
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(encryptedJson.toByteArray())
+            } ?: throw IOException("Failed to open output stream")
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Import data from an encrypted file with password protection.
+     * @param uri The URI to read the encrypted file from
+     * @param password The password to use for decryption
+     * @param replaceExisting If true, existing data will be replaced; if false, data will be merged
+     * @return Result indicating success or failure with number of imported items
+     */
+    suspend fun importEncrypted(
+        uri: Uri,
+        password: String,
+        replaceExisting: Boolean = false
+    ): Result<ImportResult> {
+        return try {
+            // Read encrypted JSON from file
+            val encryptedJson = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                inputStream.bufferedReader().readText()
+            } ?: throw IOException("Failed to open input stream")
+
+            // Parse encrypted data
+            val encryptedData = encryptedDataAdapter.fromJson(encryptedJson)
+                ?: throw IOException("Failed to parse encrypted data")
+
+            // Decrypt the data
+            val json = try {
+                EncryptionUtil.decrypt(encryptedData, password)
+            } catch (e: Exception) {
+                throw IOException("Failed to decrypt data. Wrong password?", e)
+            }
+
+            // Import the decrypted JSON
             importFromJson(json, replaceExisting)
         } catch (e: Exception) {
             Result.failure(e)
