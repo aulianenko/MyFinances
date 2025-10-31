@@ -336,6 +336,116 @@ fun SettingsScreen(
                     }
                 }
 
+                // Export/Import
+                item {
+                    // Export file launcher
+                    val exportLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.CreateDocument("application/json")
+                    ) { uri ->
+                        uri?.let { viewModel.exportData(it) }
+                    }
+
+                    // Import file launcher
+                    val importLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.OpenDocument()
+                    ) { uri ->
+                        uri?.let { viewModel.importData(it, replaceExisting = false) }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Data Management",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Export and import your financial data",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Export button
+                            Button(
+                                onClick = {
+                                    val fileName = "myfinances_export_${System.currentTimeMillis()}.json"
+                                    exportLauncher.launch(fileName)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isExporting && !uiState.isImporting
+                            ) {
+                                if (uiState.isExporting) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                                Text(if (uiState.isExporting) "Exporting..." else "Export Data")
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Import button
+                            Button(
+                                onClick = {
+                                    importLauncher.launch(arrayOf("application/json"))
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !uiState.isExporting && !uiState.isImporting
+                            ) {
+                                if (uiState.isImporting) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                                Text(if (uiState.isImporting) "Importing..." else "Import Data")
+                            }
+
+                            // Show export/import message
+                            uiState.exportImportMessage?.let { message ->
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (message.contains("success", ignoreCase = true))
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        else
+                                            MaterialTheme.colorScheme.errorContainer
+                                    )
+                                ) {
+                                    Text(
+                                        text = message,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (message.contains("success", ignoreCase = true))
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        else
+                                            MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.padding(12.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Dashboard Customization
                 item {
                     Card(

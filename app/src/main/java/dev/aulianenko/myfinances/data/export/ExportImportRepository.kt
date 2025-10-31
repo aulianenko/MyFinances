@@ -5,7 +5,6 @@ import android.net.Uri
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dev.aulianenko.myfinances.BuildConfig
 import dev.aulianenko.myfinances.data.dao.AccountDao
 import dev.aulianenko.myfinances.data.dao.AccountValueDao
 import dev.aulianenko.myfinances.data.dao.ExchangeRateDao
@@ -36,6 +35,17 @@ class ExportImportRepository @Inject constructor(
     private val exportDataAdapter = moshi.adapter(ExportData::class.java).indent("  ")
 
     /**
+     * Get the app version name from PackageManager.
+     */
+    private fun getAppVersion(): String {
+        return try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+    }
+
+    /**
      * Export all user data to JSON format.
      * @return ExportData object containing all data and metadata
      */
@@ -53,7 +63,7 @@ class ExportImportRepository @Inject constructor(
 
         return ExportData(
             metadata = ExportMetadata(
-                appVersion = BuildConfig.VERSION_NAME,
+                appVersion = getAppVersion(),
                 exportDate = System.currentTimeMillis(),
                 formatVersion = 1,
                 encrypted = false
