@@ -55,6 +55,8 @@ import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.domain.CurrencyProvider
 import dev.aulianenko.myfinances.ui.components.AppTopBar
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
+import dev.aulianenko.myfinances.ui.theme.CardShapes
+import dev.aulianenko.myfinances.ui.theme.secondaryCardElevation
 import dev.aulianenko.myfinances.ui.utils.rememberHapticFeedback
 import java.text.NumberFormat
 import java.util.Locale
@@ -114,8 +116,8 @@ fun SettingsScreen(
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -182,8 +184,8 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -242,8 +244,8 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -389,8 +391,8 @@ fun SettingsScreen(
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -582,8 +584,8 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -697,8 +699,8 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -792,8 +794,8 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -892,8 +894,8 @@ fun SettingsScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )
@@ -968,8 +970,8 @@ fun SettingsScreen(
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surface
                         )

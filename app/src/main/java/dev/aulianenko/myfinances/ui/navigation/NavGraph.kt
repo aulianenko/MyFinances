@@ -1,5 +1,7 @@
 package dev.aulianenko.myfinances.ui.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -18,7 +20,12 @@ fun NavGraph(
         startDestination = Screen.Dashboard.route,
         modifier = modifier
     ) {
-        composable(Screen.Dashboard.route) {
+        // Main navigation screens use fade transitions
+        composable(
+            route = Screen.Dashboard.route,
+            enterTransition = { fadeIn() },
+            exitTransition = { fadeOut() }
+        ) {
             dev.aulianenko.myfinances.ui.screens.dashboard.DashboardScreen(
                 onNavigateToAccountDetail = { accountId ->
                     navController.navigate(Screen.AccountDetail.createRoute(accountId))
@@ -29,7 +36,11 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.AccountList.route) {
+        composable(
+            route = Screen.AccountList.route,
+            enterTransition = { fadeIn() },
+            exitTransition = { fadeOut() }
+        ) {
             dev.aulianenko.myfinances.ui.screens.account.AccountListScreen(
                 onNavigateToAddAccount = { navController.navigate(Screen.AddAccount.route) },
                 onNavigateToAccountDetail = { accountId ->
@@ -41,7 +52,14 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.AddAccount.route) {
+        // Detail/Edit/Add screens use slide transitions
+        composable(
+            route = Screen.AddAccount.route,
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToRight() }
+        ) {
             dev.aulianenko.myfinances.ui.screens.account.AddAccountScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onAccountSaved = { navController.popBackStack() }
@@ -50,7 +68,11 @@ fun NavGraph(
 
         composable(
             route = Screen.EditAccount.route,
-            arguments = listOf(navArgument("accountId") { type = NavType.StringType })
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType }),
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToRight() }
         ) { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId") ?: return@composable
             dev.aulianenko.myfinances.ui.screens.account.EditAccountScreen(
@@ -62,7 +84,11 @@ fun NavGraph(
 
         composable(
             route = Screen.AccountDetail.route,
-            arguments = listOf(navArgument("accountId") { type = NavType.StringType })
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType }),
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToRight() }
         ) { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId") ?: return@composable
             dev.aulianenko.myfinances.ui.screens.account.AccountDetailScreen(
@@ -76,7 +102,11 @@ fun NavGraph(
 
         composable(
             route = Screen.AddAccountValue.route,
-            arguments = listOf(navArgument("accountId") { type = NavType.StringType })
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType }),
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToRight() }
         ) { backStackEntry ->
             val accountId = backStackEntry.arguments?.getString("accountId") ?: return@composable
             dev.aulianenko.myfinances.ui.screens.accountvalue.AddAccountValueScreen(
@@ -86,14 +116,24 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.BulkUpdate.route) {
+        composable(
+            route = Screen.BulkUpdate.route,
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToRight() }
+        ) {
             dev.aulianenko.myfinances.ui.screens.accountvalue.BulkUpdateScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onValuesSaved = { navController.popBackStack() }
             )
         }
 
-        composable(Screen.Settings.route) {
+        composable(
+            route = Screen.Settings.route,
+            enterTransition = { fadeIn() },
+            exitTransition = { fadeOut() }
+        ) {
             dev.aulianenko.myfinances.ui.screens.settings.SettingsScreen()
         }
     }

@@ -56,6 +56,9 @@ import dev.aulianenko.myfinances.ui.components.LineChart
 import dev.aulianenko.myfinances.ui.components.LoadingIndicator
 import dev.aulianenko.myfinances.ui.components.PieChart
 import dev.aulianenko.myfinances.ui.components.PieChartData
+import dev.aulianenko.myfinances.ui.theme.CardShapes
+import dev.aulianenko.myfinances.ui.theme.primaryCardElevation
+import dev.aulianenko.myfinances.ui.theme.secondaryCardElevation
 import dev.aulianenko.myfinances.ui.utils.rememberHapticFeedback
 import java.text.NumberFormat
 import java.util.Locale
@@ -171,11 +174,11 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = CardShapes.extraLarge,
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             ),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            elevation = primaryCardElevation()
                         ) {
                         Column(
                             modifier = Modifier
@@ -223,8 +226,8 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                            shape = CardShapes.large,
+                            elevation = secondaryCardElevation(),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
                             )
@@ -274,8 +277,8 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                            shape = CardShapes.large,
+                            elevation = secondaryCardElevation(),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surface
                             )
@@ -329,8 +332,8 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                            shape = CardShapes.extraLarge,
+                            elevation = primaryCardElevation(),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.tertiary
                             )
@@ -383,8 +386,8 @@ fun DashboardScreen(
                             analytics!!.bestPerformer?.let { best ->
                                 Card(
                                     modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(20.dp),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                                    shape = CardShapes.large,
+                                    elevation = secondaryCardElevation(),
                                     colors = CardDefaults.cardColors(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer
                                     )
@@ -424,8 +427,8 @@ fun DashboardScreen(
                             analytics.worstPerformer?.let { worst ->
                                 Card(
                                     modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(20.dp),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                                    shape = CardShapes.large,
+                                    elevation = secondaryCardElevation(),
                                     colors = CardDefaults.cardColors(
                                         containerColor = MaterialTheme.colorScheme.errorContainer
                                     )
@@ -491,8 +494,8 @@ fun AccountStatisticsCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        shape = CardShapes.large,
+        elevation = secondaryCardElevation(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
