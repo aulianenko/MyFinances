@@ -64,6 +64,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onNavigateToCurrencyConverter: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -890,6 +891,54 @@ fun SettingsScreen(
                     }
                 }
 
+                // Tools Section
+                item {
+                    Text(
+                        text = "Tools",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = CardShapes.large,
+                        elevation = secondaryCardElevation(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Currency Converter",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Convert between different currencies using current exchange rates",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+                                    haptic.click()
+                                    onNavigateToCurrencyConverter()
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Open Converter")
+                            }
+                        }
+                    }
+                }
+
                 // Mock Data Generator
                 item {
                     Card(
@@ -948,184 +997,6 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
-                        }
-                    }
-                }
-
-                item {
-                    Text(
-                        text = "Currency Converter",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                // Currency Converter
-                item {
-                    var fromCurrencyExpanded by remember { mutableStateOf(false) }
-                    var toCurrencyExpanded by remember { mutableStateOf(false) }
-                    val availableCurrencies = remember(uiState.exchangeRates) {
-                        uiState.exchangeRates.map { it.currencyCode }.sorted()
-                    }
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = CardShapes.large,
-                        elevation = secondaryCardElevation(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                        ) {
-                            // Amount Input
-                            OutlinedTextField(
-                                value = uiState.amount,
-                                onValueChange = { viewModel.setAmount(it) },
-                                label = { Text("Amount") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // From Currency
-                            ExposedDropdownMenuBox(
-                                expanded = fromCurrencyExpanded,
-                                onExpandedChange = { fromCurrencyExpanded = it }
-                            ) {
-                                OutlinedTextField(
-                                    value = "${uiState.fromCurrency} - ${CurrencyProvider.getCurrencyByCode(uiState.fromCurrency)?.name ?: ""}",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text("From") },
-                                    trailingIcon = {
-                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = fromCurrencyExpanded)
-                                    },
-                                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                    modifier = Modifier
-                                        .menuAnchor()
-                                        .fillMaxWidth()
-                                )
-
-                                ExposedDropdownMenu(
-                                    expanded = fromCurrencyExpanded,
-                                    onDismissRequest = { fromCurrencyExpanded = false }
-                                ) {
-                                    availableCurrencies.forEach { currencyCode ->
-                                        val currency = CurrencyProvider.getCurrencyByCode(currencyCode)
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text("$currencyCode - ${currency?.name ?: ""}")
-                                            },
-                                            onClick = {
-                                                viewModel.setFromCurrency(currencyCode)
-                                                fromCurrencyExpanded = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-
-                            // Swap Button
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                IconButton(
-                                    onClick = { viewModel.swapCurrencies() }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Refresh,
-                                        contentDescription = "Swap currencies",
-                                        modifier = Modifier.size(32.dp)
-                                    )
-                                }
-                            }
-
-                            // To Currency
-                            ExposedDropdownMenuBox(
-                                expanded = toCurrencyExpanded,
-                                onExpandedChange = { toCurrencyExpanded = it }
-                            ) {
-                                OutlinedTextField(
-                                    value = "${uiState.toCurrency} - ${CurrencyProvider.getCurrencyByCode(uiState.toCurrency)?.name ?: ""}",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text("To") },
-                                    trailingIcon = {
-                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = toCurrencyExpanded)
-                                    },
-                                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                    modifier = Modifier
-                                        .menuAnchor()
-                                        .fillMaxWidth()
-                                )
-
-                                ExposedDropdownMenu(
-                                    expanded = toCurrencyExpanded,
-                                    onDismissRequest = { toCurrencyExpanded = false }
-                                ) {
-                                    availableCurrencies.forEach { currencyCode ->
-                                        val currency = CurrencyProvider.getCurrencyByCode(currencyCode)
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text("$currencyCode - ${currency?.name ?: ""}")
-                                            },
-                                            onClick = {
-                                                viewModel.setToCurrency(currencyCode)
-                                                toCurrencyExpanded = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-
-                            // Result
-                            if (uiState.convertedAmount != null) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                                    )
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(
-                                            text = "Converted Amount",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        val numberFormat = remember {
-                                            NumberFormat.getNumberInstance(Locale.getDefault()).apply {
-                                                minimumFractionDigits = 2
-                                                maximumFractionDigits = 2
-                                            }
-                                        }
-                                        val toCurrency = CurrencyProvider.getCurrencyByCode(uiState.toCurrency)
-                                        Text(
-                                            text = "${toCurrency?.symbol ?: ""} ${numberFormat.format(uiState.convertedAmount)}",
-                                            style = MaterialTheme.typography.headlineMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                        Text(
-                                            text = uiState.toCurrency,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
-                                }
-                            }
                         }
                     }
                 }

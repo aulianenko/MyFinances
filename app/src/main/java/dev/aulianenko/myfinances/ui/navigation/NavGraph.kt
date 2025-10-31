@@ -134,7 +134,23 @@ fun NavGraph(
             enterTransition = { fadeIn() },
             exitTransition = { fadeOut() }
         ) {
-            dev.aulianenko.myfinances.ui.screens.settings.SettingsScreen()
+            dev.aulianenko.myfinances.ui.screens.settings.SettingsScreen(
+                onNavigateToCurrencyConverter = {
+                    navController.navigate(Screen.CurrencyConverter.route)
+                }
+            )
+        }
+
+        composable(
+            route = Screen.CurrencyConverter.route,
+            enterTransition = { slideInFromRight() },
+            exitTransition = { slideOutToLeft() },
+            popEnterTransition = { slideInFromLeft() },
+            popExitTransition = { slideOutToRight() }
+        ) {
+            dev.aulianenko.myfinances.ui.screens.converter.CurrencyConverterScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

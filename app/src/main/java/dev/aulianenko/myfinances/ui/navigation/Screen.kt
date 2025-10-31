@@ -16,4 +16,5 @@ sealed class Screen(val route: String) {
     data object BulkUpdate : Screen("bulk_update")
     data object Analytics : Screen("analytics")
     data object Settings : Screen("settings")
+    data object CurrencyConverter : Screen("currency_converter")
 }
