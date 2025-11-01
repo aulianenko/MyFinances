@@ -36,6 +36,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.aulianenko.myfinances.data.repository.ThemeMode
 import dev.aulianenko.myfinances.data.repository.UserPreferencesRepository
 import dev.aulianenko.myfinances.security.BiometricAuthManager
+import dev.aulianenko.myfinances.security.PasswordAuthManager
+import dev.aulianenko.myfinances.ui.components.PasswordAuthDialog
 import dev.aulianenko.myfinances.ui.navigation.BottomNavItem
 import dev.aulianenko.myfinances.ui.navigation.NavGraph
 import dev.aulianenko.myfinances.ui.theme.MyFinancesTheme
@@ -54,6 +56,8 @@ class MainActivity : FragmentActivity() {
 
     private var isAppLocked by mutableStateOf(false)
     private var shouldLockOnResume = false
+    private var showPasswordDialog by mutableStateOf(false)
+    private var passwordError by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,6 +176,19 @@ class MainActivity : FragmentActivity() {
                             }
                         }
                     }
+
+                    // Password authentication dialog
+                    if (showPasswordDialog) {
+                        PasswordAuthDialog(
+                            title = "Unlock MyFinances",
+                            message = "Enter your app lock password",
+                            onPasswordEntered = { password ->
+                                onPasswordEntered(password)
+                            },
+                            onDismiss = null, // Non-dismissible - must enter password
+                            errorMessage = passwordError
+                        )
+                    }
                 }
             }
         }
@@ -180,6 +197,7 @@ class MainActivity : FragmentActivity() {
     private fun checkAndShowAuthentication() {
         lifecycleScope.launch {
             val biometricEnabled = userPreferencesRepository.biometricEnabled.first()
+            val hasPassword = userPreferencesRepository.hasAppLockPassword()
 
             if (biometricEnabled) {
                 // Show biometric authentication
@@ -189,21 +207,49 @@ class MainActivity : FragmentActivity() {
                     subtitle = "Authenticate to access your financial data",
                     onSuccess = {
                         isAppLocked = false
+                        showPasswordDialog = false
                     },
-                    onError = { _, errorMessage ->
-                        // Handle authentication error - keep app locked
-                        // User can try again or close the app
-                        isAppLocked = true
+                    onError = { errorCode, errorMessage ->
+                        // If biometric fails and password is available, show password dialog
+                        if (hasPassword) {
+                            showPasswordDialog = true
+                        } else {
+                            // Keep app locked, user can try biometric again
+                            isAppLocked = true
+                        }
                     },
                     onFailed = {
-                        // Authentication failed - keep app locked
-                        isAppLocked = true
+                        // Authentication failed - show password dialog if available
+                        if (hasPassword) {
+                            showPasswordDialog = true
+                        } else {
+                            isAppLocked = true
+                        }
                     }
                 )
+            } else if (hasPassword) {
+                // No biometric but has password - show password dialog
+                showPasswordDialog = true
             } else {
-                // App lock is enabled but biometric is not - unlock immediately
-                // In a more complete implementation, you might want to show a PIN screen here
+                // No authentication method set up - this shouldn't happen in normal flow
+                // but unlock anyway to prevent being permanently locked out
                 isAppLocked = false
+            }
+        }
+    }
+
+    private fun onPasswordEntered(password: String) {
+        lifecycleScope.launch {
+            val storedHash = userPreferencesRepository.getAppLockPasswordHash()
+
+            if (storedHash != null && PasswordAuthManager.verifyPassword(password, storedHash)) {
+                // Password correct - unlock app
+                isAppLocked = false
+                showPasswordDialog = false
+                passwordError = null
+            } else {
+                // Password incorrect - show error
+                passwordError = "Incorrect password"
             }
         }
     }

@@ -44,6 +44,7 @@ class UserPreferencesRepository(private val context: Context) {
         val REMINDER_FREQUENCY_DAYS = intPreferencesKey("reminder_frequency_days")
         val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
         val APP_LOCK_ENABLED = booleanPreferencesKey("app_lock_enabled")
+        val APP_LOCK_PASSWORD_HASH = stringPreferencesKey("app_lock_password_hash")
     }
 
     companion object {
@@ -167,5 +168,27 @@ class UserPreferencesRepository(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.APP_LOCK_ENABLED] = enabled
         }
+    }
+
+    val appLockPasswordHash: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.APP_LOCK_PASSWORD_HASH]
+    }
+
+    suspend fun setAppLockPasswordHash(passwordHash: String?) {
+        context.dataStore.edit { preferences ->
+            if (passwordHash != null) {
+                preferences[PreferencesKeys.APP_LOCK_PASSWORD_HASH] = passwordHash
+            } else {
+                preferences.remove(PreferencesKeys.APP_LOCK_PASSWORD_HASH)
+            }
+        }
+    }
+
+    suspend fun getAppLockPasswordHash(): String? {
+        return appLockPasswordHash.first()
+    }
+
+    suspend fun hasAppLockPassword(): Boolean {
+        return getAppLockPasswordHash() != null
     }
 }

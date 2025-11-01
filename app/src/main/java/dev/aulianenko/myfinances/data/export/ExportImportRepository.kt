@@ -2,12 +2,14 @@ package dev.aulianenko.myfinances.data.export
 
 import android.content.Context
 import android.net.Uri
+import androidx.room.withTransaction
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.aulianenko.myfinances.data.dao.AccountDao
 import dev.aulianenko.myfinances.data.dao.AccountValueDao
 import dev.aulianenko.myfinances.data.dao.ExchangeRateDao
+import dev.aulianenko.myfinances.data.database.AppDatabase
 import dev.aulianenko.myfinances.data.entity.Account
 import dev.aulianenko.myfinances.data.entity.AccountValue
 import dev.aulianenko.myfinances.data.entity.ExchangeRate
@@ -25,6 +27,7 @@ import javax.inject.Singleton
 @Singleton
 class ExportImportRepository @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val database: AppDatabase,
     private val accountDao: AccountDao,
     private val accountValueDao: AccountValueDao,
     private val exchangeRateDao: ExchangeRateDao
@@ -119,24 +122,27 @@ class ExportImportRepository @Inject constructor(
                 throw IOException("Unsupported format version: ${data.metadata.formatVersion}")
             }
 
-            // Perform import
-            if (replaceExisting) {
-                // Delete existing data first
-                clearAllData()
-            }
+            // Perform import within a transaction to ensure atomicity
+            // If any operation fails, all changes will be rolled back
+            database.withTransaction {
+                if (replaceExisting) {
+                    // Delete existing data first
+                    clearAllData()
+                }
 
-            // Import accounts
-            data.accounts.forEach { account ->
-                accountDao.insertAccount(account)
-            }
+                // Import accounts
+                data.accounts.forEach { account ->
+                    accountDao.insertAccount(account)
+                }
 
-            // Import account values
-            data.accountValues.forEach { accountValue ->
-                accountValueDao.insertAccountValue(accountValue)
-            }
+                // Import account values
+                data.accountValues.forEach { accountValue ->
+                    accountValueDao.insertAccountValue(accountValue)
+                }
 
-            // Import exchange rates
-            exchangeRateDao.insertExchangeRates(data.exchangeRates)
+                // Import exchange rates
+                exchangeRateDao.insertExchangeRates(data.exchangeRates)
+            }
 
             Result.success(
                 ImportResult(

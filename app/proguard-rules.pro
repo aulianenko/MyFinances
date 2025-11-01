@@ -129,6 +129,65 @@
 }
 
 # ========================
+# Moshi JSON Library
+# ========================
+
+# Keep Moshi annotations and adapters
+-keepclasseswithmembers class * {
+    @com.squareup.moshi.* <methods>;
+}
+-keep @com.squareup.moshi.JsonQualifier @interface *
+-keep @com.squareup.moshi.JsonClass class * { *; }
+-keepclassmembers class * {
+    @com.squareup.moshi.Json <fields>;
+}
+
+# Keep Moshi Kotlin support
+-keep class com.squareup.moshi.kotlin.reflect.** { *; }
+-keep class kotlin.reflect.** { *; }
+
+# Keep generated Moshi adapters
+-keep class **JsonAdapter {
+    <init>(...);
+    <fields>;
+}
+-keepnames class **JsonAdapter
+
+# Keep API response models (used by Moshi)
+-keepclassmembers class dev.aulianenko.myfinances.data.api.model.** { *; }
+-keep class dev.aulianenko.myfinances.data.api.model.** { *; }
+
+# Keep export/import data classes (used by Moshi)
+-keepclassmembers class dev.aulianenko.myfinances.data.export.** { *; }
+-keep class dev.aulianenko.myfinances.data.export.** { *; }
+
+# Keep security/encryption classes (used by Moshi for encrypted backups)
+-keepclassmembers class dev.aulianenko.myfinances.security.EncryptedData { *; }
+-keep class dev.aulianenko.myfinances.security.EncryptedData { *; }
+
+# ========================
+# Retrofit & OkHttp
+# ========================
+
+# Keep Retrofit service interfaces
+-keep interface dev.aulianenko.myfinances.data.api.** { *; }
+
+# Retrofit does reflection on generic parameters
+-keepattributes Signature
+-keepattributes Exceptions
+
+# Retain service method parameters when optimizing
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+
+# Ignore warnings from OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+
+# ========================
 # Serialization & Parceling
 # ========================
 

@@ -16,7 +16,10 @@ import java.util.UUID
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["accountId"])]
+    indices = [
+        Index(value = ["accountId"]),
+        Index(value = ["timestamp"])
+    ]
 )
 data class AccountValue(
     @PrimaryKey
