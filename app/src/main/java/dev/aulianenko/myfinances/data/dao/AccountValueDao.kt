@@ -14,14 +14,26 @@ interface AccountValueDao {
     @Query("SELECT * FROM account_values WHERE accountId = :accountId ORDER BY timestamp DESC")
     fun getAccountValues(accountId: String): Flow<List<AccountValue>>
 
+    @Query("SELECT * FROM account_values WHERE accountId = :accountId ORDER BY timestamp DESC LIMIT :limit OFFSET :offset")
+    fun getAccountValuesPaginated(accountId: String, limit: Int, offset: Int): Flow<List<AccountValue>>
+
+    @Query("SELECT COUNT(*) FROM account_values WHERE accountId = :accountId")
+    suspend fun getAccountValuesCount(accountId: String): Int
+
     @Query("SELECT * FROM account_values WHERE accountId = :accountId ORDER BY timestamp DESC LIMIT 1")
     fun getLatestAccountValue(accountId: String): Flow<AccountValue?>
 
     @Query("SELECT * FROM account_values WHERE accountId = :accountId AND timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC")
     fun getAccountValuesInPeriod(accountId: String, startTime: Long, endTime: Long): Flow<List<AccountValue>>
 
+    @Query("SELECT * FROM account_values WHERE accountId = :accountId AND timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC LIMIT :limit")
+    fun getAccountValuesInPeriodLimited(accountId: String, startTime: Long, endTime: Long, limit: Int): Flow<List<AccountValue>>
+
     @Query("SELECT * FROM account_values WHERE timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC")
     fun getAllAccountValuesInPeriod(startTime: Long, endTime: Long): Flow<List<AccountValue>>
+
+    @Query("SELECT * FROM account_values WHERE timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC LIMIT :limit")
+    fun getAllAccountValuesInPeriodLimited(startTime: Long, endTime: Long, limit: Int): Flow<List<AccountValue>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAccountValue(accountValue: AccountValue)

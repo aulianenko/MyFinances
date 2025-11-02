@@ -33,7 +33,8 @@ data class DashboardUiState(
     val portfolioAnalytics: PortfolioAnalytics? = null,
     val selectedPeriod: TimePeriod = TimePeriod.THREE_MONTHS,
     val cardVisibility: DashboardCardVisibility = DashboardCardVisibility(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
 )
 
 @HiltViewModel
@@ -48,55 +49,71 @@ class DashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _uiState
-                .map { it.selectedPeriod }
-                .distinctUntilChanged()
-                .flatMapLatest { period ->
-                    val dataFlow = kotlinx.coroutines.flow.combine(
-                        calculateStatisticsUseCase.getPortfolioStatistics(period),
-                        calculateStatisticsUseCase.getPortfolioValueHistory(period),
-                        analyticsUseCase.getPortfolioAnalytics(period)
-                    ) { statistics, history, analytics ->
-                        Triple(statistics, history, analytics)
-                    }
+            try {
+                _uiState
+                    .map { it.selectedPeriod }
+                    .distinctUntilChanged()
+                    .flatMapLatest { period ->
+                        val dataFlow = kotlinx.coroutines.flow.combine(
+                            calculateStatisticsUseCase.getPortfolioStatistics(period),
+                            calculateStatisticsUseCase.getPortfolioValueHistory(period),
+                            analyticsUseCase.getPortfolioAnalytics(period)
+                        ) { statistics, history, analytics ->
+                            Triple(statistics, history, analytics)
+                        }
 
-                    val visibilityFlow = kotlinx.coroutines.flow.combine(
-                        userPreferencesRepository.showPortfolioValue,
-                        userPreferencesRepository.showPortfolioTrend,
-                        userPreferencesRepository.showPortfolioDistribution,
-                        userPreferencesRepository.showPortfolioGrowth,
-                        userPreferencesRepository.showBestWorstPerformers
-                    ) { showValue, showTrend, showDistribution, showGrowth, showPerformers ->
-                        DashboardCardVisibility(
-                            showPortfolioValue = showValue,
-                            showPortfolioTrend = showTrend,
-                            showPortfolioDistribution = showDistribution,
-                            showPortfolioGrowth = showGrowth,
-                            showBestWorstPerformers = showPerformers
-                        )
-                    }
+                        val visibilityFlow = kotlinx.coroutines.flow.combine(
+                            userPreferencesRepository.showPortfolioValue,
+                            userPreferencesRepository.showPortfolioTrend,
+                            userPreferencesRepository.showPortfolioDistribution,
+                            userPreferencesRepository.showPortfolioGrowth,
+                            userPreferencesRepository.showBestWorstPerformers
+                        ) { showValue, showTrend, showDistribution, showGrowth, showPerformers ->
+                            DashboardCardVisibility(
+                                showPortfolioValue = showValue,
+                                showPortfolioTrend = showTrend,
+                                showPortfolioDistribution = showDistribution,
+                                showPortfolioGrowth = showGrowth,
+                                showBestWorstPerformers = showPerformers
+                            )
+                        }
 
-                    kotlinx.coroutines.flow.combine(dataFlow, visibilityFlow) { (statistics, history, analytics), visibility ->
-                        DashboardData(
-                            statistics = statistics,
-                            history = history,
-                            analytics = analytics,
-                            visibility = visibility
-                        )
+                        kotlinx.coroutines.flow.combine(dataFlow, visibilityFlow) { (statistics, history, analytics), visibility ->
+                            DashboardData(
+                                statistics = statistics,
+                                history = history,
+                                analytics = analytics,
+                                visibility = visibility
+                            )
+                        }
                     }
-                }
-                .collect { data ->
-                    _uiState.update {
-                        it.copy(
-                            portfolioStatistics = data.statistics,
-                            portfolioValueHistory = data.history,
-                            portfolioAnalytics = data.analytics,
-                            cardVisibility = data.visibility,
-                            isLoading = false
-                        )
+                    .collect { data ->
+                        _uiState.update {
+                            it.copy(
+                                portfolioStatistics = data.statistics,
+                                portfolioValueHistory = data.history,
+                                portfolioAnalytics = data.analytics,
+                                cardVisibility = data.visibility,
+                                isLoading = false,
+                                errorMessage = null
+                            )
+                        }
                     }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Failed to load dashboard: ${e.message}"
+                    )
                 }
+            }
         }
+    }
+
+    fun retry() {
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        // Trigger data reload by updating period to same value
+        onPeriodChange(_uiState.value.selectedPeriod)
     }
 
     private data class DashboardData(

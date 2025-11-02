@@ -60,22 +60,64 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
+        // Combine preferences into groups to reduce coroutines from 11 to 4
+        // Group 1: Basic settings
         viewModelScope.launch {
-            // Load base currency preference
-            userPreferencesRepository.baseCurrency.collect { baseCurrency ->
-                _uiState.update { it.copy(baseCurrency = baseCurrency) }
-            }
+            kotlinx.coroutines.flow.combine(
+                userPreferencesRepository.baseCurrency,
+                userPreferencesRepository.themeMode,
+                userPreferencesRepository.notificationsEnabled,
+                userPreferencesRepository.reminderFrequencyDays
+            ) { baseCurrency, themeMode, notificationsEnabled, reminderDays ->
+                _uiState.update {
+                    it.copy(
+                        baseCurrency = baseCurrency,
+                        themeMode = themeMode,
+                        notificationsEnabled = notificationsEnabled,
+                        reminderFrequencyDays = reminderDays
+                    )
+                }
+            }.collect {}
         }
 
+        // Group 2: Dashboard card visibility
         viewModelScope.launch {
-            // Load theme mode preference
-            userPreferencesRepository.themeMode.collect { themeMode ->
-                _uiState.update { it.copy(themeMode = themeMode) }
-            }
+            kotlinx.coroutines.flow.combine(
+                userPreferencesRepository.showPortfolioValue,
+                userPreferencesRepository.showPortfolioTrend,
+                userPreferencesRepository.showPortfolioDistribution,
+                userPreferencesRepository.showPortfolioGrowth,
+                userPreferencesRepository.showBestWorstPerformers
+            ) { showValue, showTrend, showDistribution, showGrowth, showPerformers ->
+                _uiState.update {
+                    it.copy(
+                        showPortfolioValue = showValue,
+                        showPortfolioTrend = showTrend,
+                        showPortfolioDistribution = showDistribution,
+                        showPortfolioGrowth = showGrowth,
+                        showBestWorstPerformers = showPerformers
+                    )
+                }
+            }.collect {}
         }
 
+        // Group 3: Security settings
         viewModelScope.launch {
-            // Load exchange rates
+            kotlinx.coroutines.flow.combine(
+                userPreferencesRepository.biometricEnabled,
+                userPreferencesRepository.appLockEnabled
+            ) { biometricEnabled, appLockEnabled ->
+                _uiState.update {
+                    it.copy(
+                        biometricEnabled = biometricEnabled,
+                        appLockEnabled = appLockEnabled
+                    )
+                }
+            }.collect {}
+        }
+
+        // Group 4: Exchange rates
+        viewModelScope.launch {
             currencyConversionUseCase.getAllExchangeRates().collect { rates ->
                 _uiState.update {
                     it.copy(
@@ -83,61 +125,6 @@ class SettingsViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-            }
-        }
-
-        viewModelScope.launch {
-            // Load dashboard card visibility preferences
-            userPreferencesRepository.showPortfolioValue.collect { show ->
-                _uiState.update { it.copy(showPortfolioValue = show) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.showPortfolioTrend.collect { show ->
-                _uiState.update { it.copy(showPortfolioTrend = show) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.showPortfolioDistribution.collect { show ->
-                _uiState.update { it.copy(showPortfolioDistribution = show) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.showPortfolioGrowth.collect { show ->
-                _uiState.update { it.copy(showPortfolioGrowth = show) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.showBestWorstPerformers.collect { show ->
-                _uiState.update { it.copy(showBestWorstPerformers = show) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.notificationsEnabled.collect { enabled ->
-                _uiState.update { it.copy(notificationsEnabled = enabled) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.reminderFrequencyDays.collect { days ->
-                _uiState.update { it.copy(reminderFrequencyDays = days) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.biometricEnabled.collect { enabled ->
-                _uiState.update { it.copy(biometricEnabled = enabled) }
-            }
-        }
-
-        viewModelScope.launch {
-            userPreferencesRepository.appLockEnabled.collect { enabled ->
-                _uiState.update { it.copy(appLockEnabled = enabled) }
             }
         }
 
